@@ -1,4 +1,6 @@
 const { Website, Scan } = require('../Models');
+const AuditReport = require('../Models/AuditReport').default || require('../Models/AuditReport');
+const { uploadScreenshotToCloudinary } = require('./cloudinaryService');
 const { runFullAnalysis } = require('./analyzerOrchestrator');
 const { computeScores } = require('./scoringService');
 const { persistScanResults } = require('./resultPersistenceService');
@@ -171,10 +173,42 @@ async function executeScan(targetUrl, options = {}) {
       await website.save().catch(() => {});
     }
 
-    // 8. Return formatted standardized response
+    // 8. Upload screenshot to Cloudinary CDN and Save to MongoDB Atlas AuditReport Collection
+    let screenshotUrl = null;
+    if (rawResults.browser?.screenshot) {
+      screenshotUrl = await uploadScreenshotToCloudinary(rawResults.browser.screenshot).catch(() => null);
+    }
+
+    // Return formatted standardized response
     const formatted = formatAnalysisResponse(normalized, rawResults, durationMs);
     formatted.scanId = scan ? scan._id : null;
     formatted.websiteId = website ? website._id : null;
+    if (screenshotUrl) {
+      if (formatted.checks?.browser) {
+        formatted.checks.browser.screenshot = screenshotUrl;
+      }
+    }
+
+    try {
+      await AuditReport.create({
+        targetUrl: normalized,
+        scanType: 'single',
+        crawlStatus: 'completed',
+        pagesDiscovered: 1,
+        pagesScanned: 1,
+        pagesFailed: isAvailable ? 0 : 1,
+        overallScore: formatted.scores?.overall || 0,
+        rating: formatted.scores?.rating || 'Unknown',
+        domainScores: formatted.scores || {},
+        summary: formatted.summary || {},
+        screenshotUrl: screenshotUrl || null,
+        fullDetails: formatted
+      });
+      logger.success(`✓ AuditReport saved to MongoDB Atlas for ${normalized}`);
+    } catch (auditErr) {
+      logger.warn(`AuditReport MongoDB save notice: ${auditErr.message}`);
+    }
+
     return formatted;
   } catch (error) {
     logger.error(`Scan execution failed for ${targetUrl}: ${error.message}`, error.stack);

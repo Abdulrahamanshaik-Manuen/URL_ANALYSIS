@@ -44,6 +44,76 @@ async function parseResponseBody(response) {
 }
 
 /**
+ * Fetch past audit reports list from MongoDB Atlas
+ */
+export async function fetchAuditHistory() {
+  try {
+    const res = await smartFetch('/api/history', { method: 'GET' });
+    const json = await parseResponseBody(res);
+    return json.reports || [];
+  } catch (err) {
+    console.error('Error fetching audit history:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Fetch full report details by ID from MongoDB Atlas
+ */
+export async function fetchReportById(reportId) {
+  const res = await smartFetch(`/api/history/${reportId}`, { method: 'GET' });
+  const json = await parseResponseBody(res);
+  if (!res.ok || !json.report) {
+    throw new Error(json.message || 'Report not found in MongoDB Atlas');
+  }
+  return json.report;
+}
+
+/**
+ * Delete an audit report from MongoDB Atlas
+ */
+export async function deleteAuditReport(reportId) {
+  const res = await smartFetch(`/api/history/${reportId}`, { method: 'DELETE' });
+  const json = await parseResponseBody(res);
+  if (!res.ok) {
+    throw new Error(json.message || 'Failed to delete report from MongoDB Atlas');
+  }
+  return json;
+}
+
+/**
+ * Fetch user preferences from MongoDB Atlas
+ */
+export async function fetchMongoDBPreferences() {
+  try {
+    const res = await smartFetch('/api/preferences', { method: 'GET' });
+    const json = await parseResponseBody(res);
+    return json.preferences || null;
+  } catch (err) {
+    console.error('Error fetching MongoDB preferences:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Save user preferences to MongoDB Atlas
+ */
+export async function saveMongoDBPreferences(preferencesPayload) {
+  try {
+    const res = await smartFetch('/api/preferences', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(preferencesPayload)
+    });
+    const json = await parseResponseBody(res);
+    return json.preferences || null;
+  } catch (err) {
+    console.error('Error saving MongoDB preferences:', err.message);
+    return null;
+  }
+}
+
+/**
  * Health check endpoint
  */
 export async function checkBackendHealth() {

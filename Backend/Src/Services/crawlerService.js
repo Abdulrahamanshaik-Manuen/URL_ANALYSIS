@@ -1,5 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const AuditReport = require('../Models/AuditReport').default || require('../Models/AuditReport');
+const { uploadScreenshotToCloudinary } = require('./cloudinaryService');
 const { runFullAnalysis } = require('./analyzerOrchestrator');
 const { normalizeUrl, extractDomain, extractHostname, extractProtocol } = require('../Utils/urlHelper');
 const { formatAnalysisResponse } = require('../Utils/responseFormatter');
@@ -281,6 +283,34 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
     siteCrawl.durationMs = durationMs;
     siteCrawl.pages = pagesResults;
     await siteCrawl.save().catch(() => {});
+  }
+
+  const failedCount = pagesResults.filter(p => !p.statusCode || p.statusCode >= 400).length;
+  const firstScreenshot = pagesResults[0]?.details?.checks?.browser?.screenshot || null;
+  let coverScreenshotUrl = null;
+  if (firstScreenshot) {
+    coverScreenshotUrl = await uploadScreenshotToCloudinary(firstScreenshot).catch(() => null);
+  }
+
+  try {
+    await AuditReport.create({
+      targetUrl: normalized,
+      scanType: 'crawl',
+      crawlStatus: 'completed',
+      pagesDiscovered: discoveredSet.size,
+      pagesScanned: pagesResults.length,
+      pagesFailed: failedCount,
+      overallScore: siteHealthScore,
+      rating: siteHealthScore >= 90 ? 'Excellent' : siteHealthScore >= 75 ? 'Good' : siteHealthScore >= 50 ? 'Fair' : 'Poor',
+      domainScores: pagesResults[0]?.details?.scores || {},
+      summary: pagesResults[0]?.details?.summary || {},
+      screenshotUrl: coverScreenshotUrl || null,
+      crawledPages: pagesResults,
+      fullDetails: pagesResults[0]?.details || {}
+    });
+    logger.success(`✓ Full Website Crawl Report saved to MongoDB Atlas for ${normalized}`);
+  } catch (auditErr) {
+    logger.warn(`AuditReport MongoDB crawl save notice: ${auditErr.message}`);
   }
 
   const finalPayload = {

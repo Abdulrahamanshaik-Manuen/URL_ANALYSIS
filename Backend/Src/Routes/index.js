@@ -5,6 +5,8 @@ const websiteRoutes = require('./websiteRoutes');
 const scanRoutes = require('./scanRoutes');
 const crawlRoutes = require('./crawlRoutes');
 
+const historyController = require('../Controllers/historyController');
+
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.status(200).json({
@@ -14,6 +16,13 @@ router.get('/health', (req, res) => {
     version: '1.0.0'
   });
 });
+
+// History & Preferences API endpoints (MongoDB Atlas)
+router.get('/history', historyController.getHistory);
+router.get('/history/:id', historyController.getReportById);
+router.delete('/history/:id', historyController.deleteReport);
+router.get('/preferences', historyController.getPreferences);
+router.post('/preferences', historyController.savePreferences);
 
 // Mount modular sub-routers
 router.use('/websites', websiteRoutes);

@@ -22,12 +22,15 @@ import ApiTesterTab from '../components/ApiTesterTab';
 import QuickChecksTab from '../components/QuickChecksTab';
 import PagesTab from '../components/PagesTab';
 import ExportModal from '../components/ExportModal';
+import HistoryModal from '../components/HistoryModal';
 
 import {
   checkBackendHealth,
   analyzeWebsite,
   streamAnalyzeWebsite,
-  streamCrawlWebsite
+  streamCrawlWebsite,
+  fetchMongoDBPreferences,
+  saveMongoDBPreferences
 } from '../Services/apiService';
 
 import {
@@ -63,6 +66,7 @@ export default function HomePage() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   // Crawler & System Preferences
   const [scanMode, setScanMode] = useState('single');
@@ -107,10 +111,22 @@ export default function HomePage() {
     timeout: 15000
   });
 
-  // Check Backend Health on Mount
+  // Load preferences from MongoDB Atlas on Mount
   useEffect(() => {
     checkBackendHealth().then((res) => {
       setBackendStatus(res.status);
+    });
+
+    fetchMongoDBPreferences().then((prefs) => {
+      if (prefs) {
+        if (prefs.theme) {
+          setTheme(prefs.theme);
+          document.documentElement.setAttribute('data-theme', prefs.theme);
+        }
+        if (prefs.systemConfig) setSystemConfig(prefs.systemConfig);
+        if (prefs.options) setOptions(prefs.options);
+        if (prefs.advanced) setAdvanced(prefs.advanced);
+      }
     });
 
     const interval = setInterval(() => {
@@ -120,11 +136,12 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Theme Toggler
+  // Theme Toggler with MongoDB Atlas Sync
   const handleToggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
     document.documentElement.setAttribute('data-theme', nextTheme);
+    saveMongoDBPreferences({ theme: nextTheme, systemConfig, options, advanced });
   };
 
   // Run Single Page Analysis
@@ -281,6 +298,7 @@ export default function HomePage() {
         onToggleTheme={handleToggleTheme}
         onOpenExport={() => setShowExportModal(true)}
         onOpenSettings={() => setShowSettingsModal(true)}
+        onOpenHistory={() => setShowHistoryModal(true)}
         hasData={!!auditData}
       />
 
@@ -401,7 +419,25 @@ export default function HomePage() {
         <SettingsModal
           onClose={() => setShowSettingsModal(false)}
           config={systemConfig}
-          onSaveConfig={(newConfig) => setSystemConfig(newConfig)}
+          onSaveConfig={(newConfig) => {
+            setSystemConfig(newConfig);
+            saveMongoDBPreferences({ theme, systemConfig: newConfig, options, advanced });
+          }}
+        />
+      )}
+
+      {/* Saved Reports History Modal (MongoDB Atlas) */}
+      {showHistoryModal && (
+        <HistoryModal
+          onClose={() => setShowHistoryModal(false)}
+          onLoadReport={(fullDetails, reportDoc) => {
+            setAuditData(fullDetails);
+            if (reportDoc?.targetUrl) setUrl(reportDoc.targetUrl);
+            if (reportDoc?.crawledPages && reportDoc.crawledPages.length > 0) {
+              setCrawledPages(reportDoc.crawledPages);
+            }
+            setActiveTab('overview');
+          }}
         />
       )}
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Globe, Sun, Moon, Download, Settings } from 'lucide-react';
+import { Globe, Sun, Moon, Download, Settings, Database } from 'lucide-react';
 
-export default function Navbar({ backendStatus, theme, onToggleTheme, onOpenExport, onOpenSettings, hasData }) {
+export default function Navbar({ backendStatus, theme, onToggleTheme, onOpenExport, onOpenSettings, onOpenHistory, hasData }) {
   return (
     <header className="navbar">
       <div className="brand-group">
@@ -14,6 +14,11 @@ export default function Navbar({ backendStatus, theme, onToggleTheme, onOpenExpo
       </div>
 
       <div className="nav-actions">
+        <button className="export-btn" onClick={onOpenHistory} title="View Saved MongoDB Reports">
+          <Database size={15} />
+          <span>Saved Reports</span>
+        </button>
+
         {hasData && (
           <button className="export-btn" onClick={onOpenExport} title="Export Analysis Report">
             <Download size={15} />
