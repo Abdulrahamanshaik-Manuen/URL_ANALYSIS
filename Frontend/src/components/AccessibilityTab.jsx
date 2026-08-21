@@ -2,7 +2,15 @@ import React from 'react';
 import { Eye, CheckCircle2, AlertTriangle, XCircle, HelpCircle } from 'lucide-react';
 
 export default function AccessibilityTab({ data }) {
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
+        <Eye size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
+        <h4 style={{ color: 'var(--text-primary)', margin: '0 0 6px 0' }}>Awaiting Accessibility Inspection</h4>
+        <p style={{ fontSize: '13px', margin: 0 }}>Enter a target URL above and click <strong>Inspect Website</strong> to populate real-time accessibility data.</p>
+      </div>
+    );
+  }
 
   const { checks = {} } = data;
   const a11y = checks.accessibility || {};

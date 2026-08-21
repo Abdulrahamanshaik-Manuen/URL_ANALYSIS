@@ -2,7 +2,15 @@ import React from 'react';
 import { Search, Share2, CheckCircle2, AlertTriangle, XCircle, Layout } from 'lucide-react';
 
 export default function SeoTab({ data }) {
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
+        <Search size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
+        <h4 style={{ color: 'var(--text-primary)', margin: '0 0 6px 0' }}>Awaiting SEO & Meta Inspection</h4>
+        <p style={{ fontSize: '13px', margin: 0 }}>Enter a target URL above and click <strong>Inspect Website</strong> to populate real-time SEO data.</p>
+      </div>
+    );
+  }
 
   const { checks = {} } = data;
   const seo = checks.seo || {};

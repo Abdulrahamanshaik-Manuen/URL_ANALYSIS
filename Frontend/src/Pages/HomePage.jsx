@@ -330,102 +330,61 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Empty State Hero - When no analysis has been run yet */}
-      {!auditData && !isLoading && !isCrawling && (
-        <div
-          className="card"
-          style={{
-            textAlign: 'center',
-            padding: '60px 24px',
-            marginTop: '24px',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-lg)'
-          }}
-        >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: 'rgba(59, 130, 246, 0.12)',
-              color: 'var(--accent-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 20px auto'
+      {/* Fixed 18-Domain Navigation Tabs */}
+      <div className="tabs-navigation-wrapper">
+        <div className="tabs-list">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                className={`tab-btn ${isActive ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <Icon size={16} />
+                <span>{tab.label}</span>
+                {tab.badge !== null && tab.badge !== undefined && (
+                  <span className={`tab-badge ${tab.badgeType || ''}`}>
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Fixed Active Tab View */}
+      <main>
+        {activeTab === 'overview' && <OverviewTab data={auditData} isLoading={isLoading} />}
+        {activeTab === 'http' && <HttpNetworkTab data={auditData} />}
+        {activeTab === 'pages' && (
+          <PagesTab
+            pages={crawledPages}
+            siteHealthScore={crawlState.siteHealthScore}
+            onInspectPage={(pageData) => {
+              setAuditData(pageData);
+              setActiveTab('overview');
             }}
-          >
-            <Globe size={32} />
-          </div>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '10px' }}>
-            Live Website Inspector & Playwright Browser Audit Engine
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '580px', margin: '0 auto', lineHeight: '1.6' }}>
-            Enter any target URL above and click <strong>Analyze URL</strong> for single page audit or <strong>Crawl Site</strong> for multi-page website inspection. Playwright headless browser will open the site and inspect all 18 diagnostic domains live.
-          </p>
-        </div>
-      )}
-
-      {/* 18-Domain Navigation Tabs */}
-      {auditData && (
-        <div className="tabs-navigation-wrapper">
-          <div className="tabs-list">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-
-              return (
-                <button
-                  key={tab.id}
-                  className={`tab-btn ${isActive ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <Icon size={16} />
-                  <span>{tab.label}</span>
-                  {tab.badge !== null && tab.badge !== undefined && (
-                    <span className={`tab-badge ${tab.badgeType || ''}`}>
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Active Tab View */}
-      {auditData && (
-        <main>
-          {activeTab === 'overview' && <OverviewTab data={auditData} isLoading={isLoading} />}
-          {activeTab === 'http' && <HttpNetworkTab data={auditData} />}
-          {activeTab === 'pages' && (
-            <PagesTab
-              pages={crawledPages}
-              siteHealthScore={crawlState.siteHealthScore}
-              onInspectPage={(pageData) => {
-                setAuditData(pageData);
-                setActiveTab('overview');
-              }}
-            />
-          )}
-          {activeTab === 'errors' && <ErrorsTab data={auditData} />}
-          {activeTab === 'performance' && <PerformanceTab data={auditData} />}
-          {activeTab === 'security' && <SecurityTab data={auditData} />}
-          {activeTab === 'cookies' && <CookiesTab data={auditData} />}
-          {activeTab === 'seo' && <SeoTab data={auditData} />}
-          {activeTab === 'robots' && <RobotsSitemapTab data={auditData} />}
-          {activeTab === 'content' && <ContentTab data={auditData} />}
-          {activeTab === 'a11y' && <AccessibilityTab data={auditData} />}
-          {activeTab === 'links' && <LinksTab data={auditData} />}
-          {activeTab === 'assets' && <AssetsTab data={auditData} />}
-          {activeTab === 'responsive' && <ResponsiveTab data={auditData} />}
-          {activeTab === 'tech' && <TechnologyTab data={auditData} />}
-          {activeTab === 'api' && <ApiTesterTab initialUrl={url} />}
-          {activeTab === 'quick' && <QuickChecksTab currentUrl={url} />}
-        </main>
-      )}
+          />
+        )}
+        {activeTab === 'errors' && <ErrorsTab data={auditData} />}
+        {activeTab === 'performance' && <PerformanceTab data={auditData} />}
+        {activeTab === 'security' && <SecurityTab data={auditData} />}
+        {activeTab === 'cookies' && <CookiesTab data={auditData} />}
+        {activeTab === 'seo' && <SeoTab data={auditData} />}
+        {activeTab === 'robots' && <RobotsSitemapTab data={auditData} />}
+        {activeTab === 'content' && <ContentTab data={auditData} />}
+        {activeTab === 'a11y' && <AccessibilityTab data={auditData} />}
+        {activeTab === 'links' && <LinksTab data={auditData} />}
+        {activeTab === 'assets' && <AssetsTab data={auditData} />}
+        {activeTab === 'responsive' && <ResponsiveTab data={auditData} />}
+        {activeTab === 'tech' && <TechnologyTab data={auditData} />}
+        {activeTab === 'api' && <ApiTesterTab initialUrl={url} />}
+        {activeTab === 'quick' && <QuickChecksTab currentUrl={url} />}
+      </main>
 
       {/* Export Report Modal */}
       {showExportModal && auditData && (

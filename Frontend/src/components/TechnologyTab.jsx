@@ -2,7 +2,15 @@ import React from 'react';
 import { Cpu, Server, Layout, Sparkles, BarChart2, Cloud } from 'lucide-react';
 
 export default function TechnologyTab({ data }) {
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
+        <Cpu size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
+        <h4 style={{ color: 'var(--text-primary)', margin: '0 0 6px 0' }}>Awaiting Technology Inspection</h4>
+        <p style={{ fontSize: '13px', margin: 0 }}>Enter a target URL above and click <strong>Inspect Website</strong> to populate real-time technology stack data.</p>
+      </div>
+    );
+  }
 
   const { checks = {} } = data;
   const tech = checks.technology || {};

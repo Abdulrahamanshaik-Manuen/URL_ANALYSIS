@@ -5,7 +5,15 @@ export default function LinksTab({ data }) {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
+        <Link2 size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
+        <h4 style={{ color: 'var(--text-primary)', margin: '0 0 6px 0' }}>Awaiting Links Inspection</h4>
+        <p style={{ fontSize: '13px', margin: 0 }}>Enter a target URL above and click <strong>Inspect Website</strong> to populate real-time link data.</p>
+      </div>
+    );
+  }
 
   const { checks = {} } = data;
   const links = checks.links || {};

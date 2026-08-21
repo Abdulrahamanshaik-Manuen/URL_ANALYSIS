@@ -18,16 +18,17 @@ import {
 export default function OverviewTab({ data, isLoading }) {
   const [showScreenshotModal, setShowScreenshotModal] = useState(false);
 
-  if (!data) return null;
-
-  const { scores = {}, summary = {}, diagnostics = {}, checks = {} } = data;
-  const overall = scores.overall || 0;
-  const rating = scores.rating || 'Unknown';
+  const { scores = {}, summary = {}, diagnostics = {}, checks = {} } = data || {};
+  const hasData = !!data;
+  const overall = hasData ? (scores.overall || 0) : null;
+  const rating = hasData ? (scores.rating || 'N/A') : 'Awaiting URL';
   const screenshot = checks.browser?.screenshot;
   const browserError = checks.browser?.error;
 
   const ratingClass =
-    rating === 'Excellent'
+    !hasData
+      ? 'rating-fair'
+      : rating === 'Excellent'
       ? 'rating-excellent'
       : rating === 'Good'
       ? 'rating-good'
@@ -38,9 +39,10 @@ export default function OverviewTab({ data, isLoading }) {
   // SVG Circle calculations
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (overall / 100) * circumference;
+  const strokeDashoffset = hasData ? (circumference - (overall / 100) * circumference) : circumference;
 
   const getScoreColor = (val) => {
+    if (!hasData || val === null || val === undefined) return 'var(--text-muted)';
     if (val >= 90) return 'var(--success)';
     if (val >= 75) return 'var(--info)';
     if (val >= 50) return 'var(--warning)';
@@ -87,7 +89,7 @@ export default function OverviewTab({ data, isLoading }) {
               </svg>
               <div className="score-text">
                 <div className="score-number" style={{ color: getScoreColor(overall) }}>
-                  {overall}
+                  {hasData && overall !== null ? overall : '--'}
                 </div>
                 <div className="score-label">/ 100</div>
               </div>
@@ -98,7 +100,7 @@ export default function OverviewTab({ data, isLoading }) {
                 Composite score calculated across Availability, Performance, Security, SEO, and Accessibility domains.
               </p>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Target: <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{data.targetUrl}</span>
+                Target: <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{hasData ? data.targetUrl : 'Awaiting URL submission...'}</span>
               </div>
             </div>
           </div>
@@ -117,12 +119,12 @@ export default function OverviewTab({ data, isLoading }) {
             <div className="cat-row">
               <div className="cat-header">
                 <span>Availability & Uptime</span>
-                <span style={{ color: getScoreColor(scores.availability || 0) }}>{scores.availability || 0}%</span>
+                <span style={{ color: getScoreColor(scores.availability || 0) }}>{hasData ? (scores.availability || 0) : 0}%</span>
               </div>
               <div className="progress-track">
                 <div
                   className="progress-fill"
-                  style={{ width: `${scores.availability || 0}%`, background: getScoreColor(scores.availability || 0) }}
+                  style={{ width: `${hasData ? (scores.availability || 0) : 0}%`, background: getScoreColor(scores.availability || 0) }}
                 />
               </div>
             </div>
@@ -130,12 +132,12 @@ export default function OverviewTab({ data, isLoading }) {
             <div className="cat-row">
               <div className="cat-header">
                 <span>Performance & Speed</span>
-                <span style={{ color: getScoreColor(scores.performance || 0) }}>{scores.performance || 0}%</span>
+                <span style={{ color: getScoreColor(scores.performance || 0) }}>{hasData ? (scores.performance || 0) : 0}%</span>
               </div>
               <div className="progress-track">
                 <div
                   className="progress-fill"
-                  style={{ width: `${scores.performance || 0}%`, background: getScoreColor(scores.performance || 0) }}
+                  style={{ width: `${hasData ? (scores.performance || 0) : 0}%`, background: getScoreColor(scores.performance || 0) }}
                 />
               </div>
             </div>
@@ -143,12 +145,12 @@ export default function OverviewTab({ data, isLoading }) {
             <div className="cat-row">
               <div className="cat-header">
                 <span>Security & SSL</span>
-                <span style={{ color: getScoreColor(scores.security || 0) }}>{scores.security || 0}%</span>
+                <span style={{ color: getScoreColor(scores.security || 0) }}>{hasData ? (scores.security || 0) : 0}%</span>
               </div>
               <div className="progress-track">
                 <div
                   className="progress-fill"
-                  style={{ width: `${scores.security || 0}%`, background: getScoreColor(scores.security || 0) }}
+                  style={{ width: `${hasData ? (scores.security || 0) : 0}%`, background: getScoreColor(scores.security || 0) }}
                 />
               </div>
             </div>
@@ -156,12 +158,12 @@ export default function OverviewTab({ data, isLoading }) {
             <div className="cat-row">
               <div className="cat-header">
                 <span>SEO & Discoverability</span>
-                <span style={{ color: getScoreColor(scores.seo || 0) }}>{scores.seo || 0}%</span>
+                <span style={{ color: getScoreColor(scores.seo || 0) }}>{hasData ? (scores.seo || 0) : 0}%</span>
               </div>
               <div className="progress-track">
                 <div
                   className="progress-fill"
-                  style={{ width: `${scores.seo || 0}%`, background: getScoreColor(scores.seo || 0) }}
+                  style={{ width: `${hasData ? (scores.seo || 0) : 0}%`, background: getScoreColor(scores.seo || 0) }}
                 />
               </div>
             </div>
@@ -169,12 +171,12 @@ export default function OverviewTab({ data, isLoading }) {
             <div className="cat-row">
               <div className="cat-header">
                 <span>Accessibility (a11y)</span>
-                <span style={{ color: getScoreColor(scores.accessibility || 0) }}>{scores.accessibility || 0}%</span>
+                <span style={{ color: getScoreColor(scores.accessibility || 0) }}>{hasData ? (scores.accessibility || 0) : 0}%</span>
               </div>
               <div className="progress-track">
                 <div
                   className="progress-fill"
-                  style={{ width: `${scores.accessibility || 0}%`, background: getScoreColor(scores.accessibility || 0) }}
+                  style={{ width: `${hasData ? (scores.accessibility || 0) : 0}%`, background: getScoreColor(scores.accessibility || 0) }}
                 />
               </div>
             </div>
@@ -258,11 +260,13 @@ export default function OverviewTab({ data, isLoading }) {
                 color: 'var(--text-muted)',
                 background: 'var(--bg-tertiary)',
                 borderRadius: 'var(--radius-sm)',
-                fontSize: '13px'
+                fontSize: '13px',
+                padding: '16px',
+                textAlign: 'center'
               }}
             >
               <Eye size={24} style={{ opacity: 0.5 }} />
-              <span>No browser screenshot captured</span>
+              <span>{hasData ? 'No browser screenshot captured' : 'Enter a URL above and click Inspect Website to capture live browser screenshot'}</span>
             </div>
           )}
         </div>
@@ -272,38 +276,38 @@ export default function OverviewTab({ data, isLoading }) {
       <div className="stats-grid" style={{ marginBottom: '28px' }}>
         <div className="stat-box">
           <div className="stat-box-label">HTTP Status</div>
-          <div className="stat-box-value" style={{ color: summary.statusCode < 400 ? 'var(--success)' : 'var(--danger)' }}>
-            {summary.statusCode || 'N/A'} {summary.statusText || ''}
+          <div className="stat-box-value" style={{ color: !hasData ? 'var(--text-muted)' : (summary.statusCode < 400 ? 'var(--success)' : 'var(--danger)') }}>
+            {hasData ? (summary.statusCode ? `${summary.statusCode} ${summary.statusText || ''}` : 'N/A') : '--'}
           </div>
         </div>
         <div className="stat-box">
           <div className="stat-box-label">Response Latency</div>
           <div className="stat-box-value">
-            {summary.responseTimeMs ? `${summary.responseTimeMs} ms` : 'N/A'}
+            {hasData ? (summary.responseTimeMs ? `${summary.responseTimeMs} ms` : 'N/A') : '--'}
           </div>
         </div>
         <div className="stat-box">
           <div className="stat-box-label">SSL Validity</div>
-          <div className="stat-box-value" style={{ color: summary.sslValid ? 'var(--success)' : 'var(--danger)' }}>
-            {summary.sslValid ? `${summary.sslDaysRemaining}d remaining` : 'Invalid / Insecure'}
+          <div className="stat-box-value" style={{ color: !hasData ? 'var(--text-muted)' : (summary.sslValid ? 'var(--success)' : 'var(--danger)') }}>
+            {hasData ? (summary.sslValid ? `${summary.sslDaysRemaining}d remaining` : 'Invalid / Insecure') : '--'}
           </div>
         </div>
         <div className="stat-box">
           <div className="stat-box-label">JS Console Errors</div>
-          <div className="stat-box-value" style={{ color: summary.jsErrorsCount > 0 ? 'var(--danger)' : 'var(--success)' }}>
-            {summary.jsErrorsCount}
+          <div className="stat-box-value" style={{ color: !hasData ? 'var(--text-muted)' : (summary.jsErrorsCount > 0 ? 'var(--danger)' : 'var(--success)') }}>
+            {hasData ? (summary.jsErrorsCount || 0) : '--'}
           </div>
         </div>
         <div className="stat-box">
           <div className="stat-box-label">Broken Links</div>
-          <div className="stat-box-value" style={{ color: summary.brokenLinksCount > 0 ? 'var(--warning)' : 'var(--success)' }}>
-            {summary.brokenLinksCount}
+          <div className="stat-box-value" style={{ color: !hasData ? 'var(--text-muted)' : (summary.brokenLinksCount > 0 ? 'var(--warning)' : 'var(--success)') }}>
+            {hasData ? (summary.brokenLinksCount || 0) : '--'}
           </div>
         </div>
         <div className="stat-box">
           <div className="stat-box-label">Tech Signatures</div>
           <div className="stat-box-value">
-            {summary.technologiesCount || 0}
+            {hasData ? (summary.technologiesCount || 0) : '--'}
           </div>
         </div>
       </div>
@@ -316,48 +320,56 @@ export default function OverviewTab({ data, isLoading }) {
             <span>Audit Findings & Issue Diagnostics</span>
           </div>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            {(diagnostics.criticalIssues?.length || 0) + (diagnostics.warnings?.length || 0)} issues detected
+            {hasData ? `${(diagnostics.criticalIssues?.length || 0) + (diagnostics.warnings?.length || 0)} issues detected` : '0 issues'}
           </span>
         </div>
 
         <div className="issues-feed">
-          {diagnostics.criticalIssues?.map((iss, idx) => (
-            <div key={`crit-${idx}`} className="issue-item critical">
-              <XCircle size={18} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: '2px' }} />
-              <div className="issue-content">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                  <span className="issue-domain-tag" style={{ background: 'var(--danger)', color: '#fff' }}>{iss.domain}</span>
-                  <strong style={{ wordBreak: 'break-word' }}>{iss.title}</strong>
-                </div>
-                {iss.desc && <p>{iss.desc}</p>}
-              </div>
+          {!hasData ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+              No active URL scan submitted yet. Enter a website URL above and click <strong>Inspect Website</strong>.
             </div>
-          ))}
+          ) : (
+            <>
+              {diagnostics.criticalIssues?.map((iss, idx) => (
+                <div key={`crit-${idx}`} className="issue-item critical">
+                  <XCircle size={18} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: '2px' }} />
+                  <div className="issue-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                      <span className="issue-domain-tag" style={{ background: 'var(--danger)', color: '#fff' }}>{iss.domain}</span>
+                      <strong style={{ wordBreak: 'break-word' }}>{iss.title}</strong>
+                    </div>
+                    {iss.desc && <p>{iss.desc}</p>}
+                  </div>
+                </div>
+              ))}
 
-          {diagnostics.warnings?.map((warn, idx) => (
-            <div key={`warn-${idx}`} className="issue-item warning">
-              <AlertTriangle size={18} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: '2px' }} />
-              <div className="issue-content">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                  <span className="issue-domain-tag" style={{ background: 'var(--warning)', color: '#000' }}>{warn.domain}</span>
-                  <strong style={{ wordBreak: 'break-word' }}>{warn.title}</strong>
+              {diagnostics.warnings?.map((warn, idx) => (
+                <div key={`warn-${idx}`} className="issue-item warning">
+                  <AlertTriangle size={18} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: '2px' }} />
+                  <div className="issue-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                      <span className="issue-domain-tag" style={{ background: 'var(--warning)', color: '#000' }}>{warn.domain}</span>
+                      <strong style={{ wordBreak: 'break-word' }}>{warn.title}</strong>
+                    </div>
+                    {warn.desc && <p>{warn.desc}</p>}
+                  </div>
                 </div>
-                {warn.desc && <p>{warn.desc}</p>}
-              </div>
-            </div>
-          ))}
+              ))}
 
-          {diagnostics.passedChecks?.slice(0, 5).map((pass, idx) => (
-            <div key={`pass-${idx}`} className="issue-item passed">
-              <CheckCircle2 size={18} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '2px' }} />
-              <div className="issue-content">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span className="issue-domain-tag" style={{ background: 'var(--success)', color: '#fff' }}>{pass.domain}</span>
-                  <span style={{ wordBreak: 'break-word' }}>{pass.title}</span>
+              {diagnostics.passedChecks?.slice(0, 5).map((pass, idx) => (
+                <div key={`pass-${idx}`} className="issue-item passed">
+                  <CheckCircle2 size={18} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '2px' }} />
+                  <div className="issue-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span className="issue-domain-tag" style={{ background: 'var(--success)', color: '#fff' }}>{pass.domain}</span>
+                      <span style={{ wordBreak: 'break-word' }}>{pass.title}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              ))}
+            </>
+          )}
         </div>
       </div>
 
