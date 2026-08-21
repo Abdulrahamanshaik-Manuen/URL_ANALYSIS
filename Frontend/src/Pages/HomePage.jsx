@@ -304,9 +304,14 @@ export default function HomePage() {
         <CrawlProgressCard crawlState={crawlState} />
       )}
 
-      {/* Live Progress Banner for Single Page */}
-      {isLoading && !isCrawling && (
-        <LiveProgress currentStep={currentStep} activeSteps={activeSteps} compact={!!auditData} />
+      {/* Fixed Real-Time Live Analysis Progress Card */}
+      {!isCrawling && (
+        <LiveProgress
+          currentStep={currentStep}
+          activeSteps={activeSteps}
+          isLoading={isLoading}
+          hasData={!!auditData}
+        />
       )}
 
       {/* Error Alert */}
