@@ -2,11 +2,13 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const MONGO_URI =
-  process.env.MONGO_URI ||
-  'mongodb+srv://shaikabdul:shaikabdulr503@data-storage.uleb4ax.mongodb.net/URL_ANALYSIS?retryWrites=true&w=majority&appName=URL_ANALYSIS';
+const MONGO_URI = process.env.MONGO_URI;
 
 export async function connectDB() {
+  if (!MONGO_URI) {
+    console.error('✗ MONGO_URI environment variable is missing from .env');
+    return null;
+  }
   try {
     const conn = await mongoose.connect(MONGO_URI);
     console.log(`✓ MongoDB Atlas Connected successfully to host: ${conn.connection.host}`);

@@ -6,7 +6,11 @@ const logger = require('../Utils/logger');
  * @returns {Promise<typeof mongoose>}
  */
 async function connectDB() {
-  const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/URL_ANALYSIS';
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    logger.error('❌ MONGO_URI environment variable is missing from .env');
+    return null;
+  }
 
   const options = {
     dbName: 'URL_ANALYSIS', // Enforces URL_ANALYSIS as the explicit target database
