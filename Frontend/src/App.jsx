@@ -1,0 +1,451 @@
+import React, { useState, useEffect } from 'react';
+import Navbar from './components/Navbar';
+import UrlInputBar from './components/UrlInputBar';
+import LiveProgress from './components/LiveProgress';
+import CrawlProgressCard from './components/CrawlProgressCard';
+import SettingsModal from './components/SettingsModal';
+import OverviewTab from './components/OverviewTab';
+import HttpNetworkTab from './components/HttpNetworkTab';
+import ErrorsTab from './components/ErrorsTab';
+import PerformanceTab from './components/PerformanceTab';
+import SecurityTab from './components/SecurityTab';
+import CookiesTab from './components/CookiesTab';
+import SeoTab from './components/SeoTab';
+import RobotsSitemapTab from './components/RobotsSitemapTab';
+import ContentTab from './components/ContentTab';
+import AccessibilityTab from './components/AccessibilityTab';
+import LinksTab from './components/LinksTab';
+import AssetsTab from './components/AssetsTab';
+import ResponsiveTab from './components/ResponsiveTab';
+import TechnologyTab from './components/TechnologyTab';
+import ApiTesterTab from './components/ApiTesterTab';
+import QuickChecksTab from './components/QuickChecksTab';
+import PagesTab from './components/PagesTab';
+import ExportModal from './components/ExportModal';
+
+import {
+  checkBackendHealth,
+  analyzeWebsite,
+  streamAnalyzeWebsite,
+  streamCrawlWebsite
+} from './Services/apiService';
+
+import {
+  Activity,
+  Globe,
+  AlertOctagon,
+  Zap,
+  Lock,
+  Cookie,
+  Search,
+  FileCode,
+  AlignLeft,
+  Eye,
+  Link2,
+  Image,
+  Smartphone,
+  Cpu,
+  Send,
+  Sparkles,
+  Compass,
+  AlertCircle
+} from 'lucide-react';
+
+export default function App() {
+  const [theme, setTheme] = useState('dark');
+  const [backendStatus, setBackendStatus] = useState('checking');
+  const [url, setUrl] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [activeSteps, setActiveSteps] = useState([]);
+  const [auditData, setAuditData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  // Crawler & System Preferences
+  const [scanMode, setScanMode] = useState('single');
+  const [isCrawling, setIsCrawling] = useState(false);
+  const [crawledPages, setCrawledPages] = useState([]);
+  const [crawlState, setCrawlState] = useState({
+    discoveredCount: 0,
+    crawledCount: 0,
+    remainingCount: 0,
+    currentUrl: '',
+    siteHealthScore: 0
+  });
+
+  const [systemConfig, setSystemConfig] = useState({
+    timerMinutes: null,
+    maxPages: 25,
+    concurrency: 3,
+    respectRobots: true
+  });
+
+  // Advanced Options
+  const [options, setOptions] = useState({
+    checkDNS: true,
+    checkSSL: true,
+    checkPerformance: true,
+    checkRedirects: true,
+    checkSecurity: true,
+    checkCookies: true,
+    checkSEO: true,
+    checkA11y: true,
+    checkResources: true,
+    checkLinks: true,
+    checkContent: true,
+    checkMobile: true,
+    checkTech: true,
+    checkBrowser: true
+  });
+
+  const [advanced, setAdvanced] = useState({
+    userAgent: '',
+    keyword: '',
+    timeout: 15000
+  });
+
+  // Check Backend Health on Mount
+  useEffect(() => {
+    checkBackendHealth().then((res) => {
+      setBackendStatus(res.status);
+    });
+
+    const interval = setInterval(() => {
+      checkBackendHealth().then((res) => setBackendStatus(res.status));
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Theme Toggler
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+  };
+
+  // Run Single Page Analysis
+  const handleAnalyze = () => {
+    if (!url.trim()) return;
+
+    setIsLoading(true);
+    setIsCrawling(false);
+    setErrorMessage(null);
+    setCurrentStep('start');
+    setActiveSteps(['start']);
+
+    const cleanup = streamAnalyzeWebsite(
+      url,
+      options,
+      advanced,
+      (progressEvent) => {
+        const step = progressEvent.step;
+        setCurrentStep(step);
+        setActiveSteps((prev) => (prev.includes(step) ? prev : [...prev, step]));
+
+        if (step === 'partial' && progressEvent.data) {
+          setAuditData(progressEvent.data);
+        }
+      },
+      (finalData) => {
+        setAuditData(finalData);
+        setIsLoading(false);
+        setCurrentStep(null);
+      },
+      (err) => {
+        analyzeWebsite(url, options, advanced)
+          .then((res) => {
+            setAuditData(res);
+            setIsLoading(false);
+            setCurrentStep(null);
+          })
+          .catch((postErr) => {
+            setErrorMessage(postErr.message || err.message);
+            setIsLoading(false);
+            setCurrentStep(null);
+          });
+      }
+    );
+  };
+
+  // Run Full Website Crawl
+  const handleCrawl = () => {
+    if (!url.trim()) return;
+
+    setIsLoading(true);
+    setIsCrawling(true);
+    setErrorMessage(null);
+    setCrawledPages([]);
+    setCrawlState({
+      discoveredCount: 1,
+      crawledCount: 0,
+      remainingCount: 1,
+      currentUrl: url,
+      siteHealthScore: 0,
+      maxPages: systemConfig.maxPages || 25
+    });
+
+    const cleanup = streamCrawlWebsite(
+      url,
+      systemConfig.maxPages || 25,
+      ({ event, data }) => {
+        if (event === 'page_done' && data.page) {
+          setCrawledPages((prev) => [...prev, data.page]);
+          setCrawlState({
+            discoveredCount: data.discoveredCount || 1,
+            crawledCount: data.crawledCount || 0,
+            remainingCount: data.remainingCount || 0,
+            currentUrl: data.page.url,
+            siteHealthScore: data.siteHealthScore || 0,
+            maxPages: systemConfig.maxPages || 25,
+            crawlingProgressText: data.crawlingProgressText || `Crawled ${data.crawledCount} pages`
+          });
+
+          // Update dashboard live with newly crawled page analysis
+          if (data.page.details && data.page.details.checks) {
+            setAuditData(data.page.details);
+          }
+        } else if (event === 'page_start' && data.currentUrl) {
+          setCrawlState((prev) => ({
+            ...prev,
+            currentUrl: data.currentUrl,
+            discoveredCount: data.discoveredCount || prev.discoveredCount,
+            crawledCount: data.crawledCount || prev.crawledCount,
+            remainingCount: data.remainingCount || prev.remainingCount,
+            crawlingProgressText: data.crawlingProgressText || `Crawling ${data.crawledCount + 1} pages`
+          }));
+        }
+      },
+      (finalPayload) => {
+        setIsLoading(false);
+        setIsCrawling(false);
+        if (finalPayload.pages && finalPayload.pages.length > 0) {
+          setCrawledPages(finalPayload.pages);
+          if (finalPayload.pages[0].details) {
+            setAuditData(finalPayload.pages[0].details);
+          }
+        }
+        setActiveTab('pages');
+      },
+      (err) => {
+        setIsLoading(false);
+        setIsCrawling(false);
+        setErrorMessage(err.message || 'Website crawl encountered an error');
+      }
+    );
+  };
+
+  const totalErrors =
+    (auditData?.summary?.jsErrorsCount || 0) +
+    (auditData?.summary?.brokenLinksCount || 0) +
+    (auditData?.summary?.brokenResourcesCount || 0);
+
+  const tabs = [
+    { id: 'overview', label: 'Overview & Health', icon: Activity },
+    { id: 'http', label: 'HTTP / Status', icon: Globe },
+    {
+      id: 'pages',
+      label: 'Pages & Site Map',
+      icon: Compass,
+      badge: crawledPages.length > 0 ? crawledPages.length : null,
+      badgeType: 'success'
+    },
+    {
+      id: 'errors',
+      label: 'Errors & Console',
+      icon: AlertOctagon,
+      badge: (auditData?.summary?.jsErrorsCount || 0) > 0 ? auditData.summary.jsErrorsCount : null,
+      badgeType: 'danger'
+    },
+    { id: 'performance', label: 'Performance', icon: Zap },
+    { id: 'security', label: 'Security & SSL', icon: Lock },
+    { id: 'cookies', label: 'Cookies & Privacy', icon: Cookie },
+    { id: 'seo', label: 'SEO & Meta', icon: Search },
+    { id: 'robots', label: 'Robots & Sitemap', icon: FileCode },
+    { id: 'content', label: 'Content & Headings', icon: AlignLeft },
+    { id: 'a11y', label: 'Accessibility', icon: Eye, badge: (auditData?.summary?.a11yIssuesCount || 0) > 0 ? auditData.summary.a11yIssuesCount : null, badgeType: 'warning' },
+    { id: 'links', label: 'Links Inspector', icon: Link2, badge: (auditData?.summary?.brokenLinksCount || 0) > 0 ? auditData.summary.brokenLinksCount : null, badgeType: 'danger' },
+    { id: 'assets', label: 'Images & Assets', icon: Image },
+    { id: 'responsive', label: 'Responsive', icon: Smartphone },
+    { id: 'tech', label: 'Technology Stack', icon: Cpu },
+    { id: 'api', label: 'API Tester', icon: Send },
+    { id: 'quick', label: 'Micro-Checks', icon: Sparkles }
+  ];
+
+  return (
+    <div className="app-container">
+      <div className="ambient-glow-1"></div>
+      <div className="ambient-glow-2"></div>
+
+      {/* Navbar */}
+      <Navbar
+        backendStatus={backendStatus}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
+        onOpenExport={() => setShowExportModal(true)}
+        onOpenSettings={() => setShowSettingsModal(true)}
+        hasData={!!auditData}
+      />
+
+      {/* Hero URL Input Bar */}
+      <UrlInputBar
+        url={url}
+        setUrl={setUrl}
+        onAnalyze={handleAnalyze}
+        onCrawl={handleCrawl}
+        isLoading={isLoading}
+        scanMode={scanMode}
+        setScanMode={setScanMode}
+        options={options}
+        setOptions={setOptions}
+        advanced={advanced}
+        setAdvanced={setAdvanced}
+      />
+
+      {/* Crawl Live Progress Widget */}
+      {isCrawling && (
+        <CrawlProgressCard crawlState={crawlState} />
+      )}
+
+      {/* Live Progress Banner for Single Page */}
+      {isLoading && !isCrawling && (
+        <LiveProgress currentStep={currentStep} activeSteps={activeSteps} compact={!!auditData} />
+      )}
+
+      {/* Error Alert */}
+      {errorMessage && (
+        <div
+          className="card"
+          style={{
+            borderLeft: '4px solid var(--danger)',
+            background: 'var(--danger-bg)',
+            marginBottom: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}
+        >
+          <AlertCircle size={24} style={{ color: 'var(--danger)', flexShrink: 0 }} />
+          <div>
+            <strong style={{ color: 'var(--danger)' }}>Action Failed</strong>
+            <p style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{errorMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Empty State Hero - When no analysis has been run yet */}
+      {!auditData && !isLoading && !isCrawling && (
+        <div
+          className="card"
+          style={{
+            textAlign: 'center',
+            padding: '60px 24px',
+            marginTop: '24px',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-lg)'
+          }}
+        >
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(59, 130, 246, 0.12)',
+              color: 'var(--accent-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px auto'
+            }}
+          >
+            <Globe size={32} />
+          </div>
+          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '10px' }}>
+            Live Website Inspector & Playwright Browser Audit Engine
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '580px', margin: '0 auto', lineHeight: '1.6' }}>
+            Enter any target URL above and click <strong>Analyze URL</strong> for single page audit or <strong>Crawl Site</strong> for multi-page website inspection. Playwright headless browser will open the site and inspect all 18 diagnostic domains live.
+          </p>
+        </div>
+      )}
+
+      {/* 18-Domain Navigation Tabs */}
+      {auditData && (
+        <div className="tabs-navigation-wrapper">
+          <div className="tabs-list">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+
+              return (
+                <button
+                  key={tab.id}
+                  className={`tab-btn ${isActive ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <Icon size={16} />
+                  <span>{tab.label}</span>
+                  {tab.badge !== null && tab.badge !== undefined && (
+                    <span className={`tab-badge ${tab.badgeType || ''}`}>
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Active Tab View */}
+      {auditData && (
+        <main>
+          {activeTab === 'overview' && <OverviewTab data={auditData} isLoading={isLoading} />}
+          {activeTab === 'http' && <HttpNetworkTab data={auditData} />}
+          {activeTab === 'pages' && (
+            <PagesTab
+              pages={crawledPages}
+              siteHealthScore={crawlState.siteHealthScore}
+              onInspectPage={(pageData) => {
+                setAuditData(pageData);
+                setActiveTab('overview');
+              }}
+            />
+          )}
+          {activeTab === 'errors' && <ErrorsTab data={auditData} />}
+          {activeTab === 'performance' && <PerformanceTab data={auditData} />}
+          {activeTab === 'security' && <SecurityTab data={auditData} />}
+          {activeTab === 'cookies' && <CookiesTab data={auditData} />}
+          {activeTab === 'seo' && <SeoTab data={auditData} />}
+          {activeTab === 'robots' && <RobotsSitemapTab data={auditData} />}
+          {activeTab === 'content' && <ContentTab data={auditData} />}
+          {activeTab === 'a11y' && <AccessibilityTab data={auditData} />}
+          {activeTab === 'links' && <LinksTab data={auditData} />}
+          {activeTab === 'assets' && <AssetsTab data={auditData} />}
+          {activeTab === 'responsive' && <ResponsiveTab data={auditData} />}
+          {activeTab === 'tech' && <TechnologyTab data={auditData} />}
+          {activeTab === 'api' && <ApiTesterTab initialUrl={url} />}
+          {activeTab === 'quick' && <QuickChecksTab currentUrl={url} />}
+        </main>
+      )}
+
+      {/* Export Report Modal */}
+      {showExportModal && auditData && (
+        <ExportModal data={auditData} onClose={() => setShowExportModal(false)} />
+      )}
+
+      {/* System Settings & Timer Modal */}
+      {showSettingsModal && (
+        <SettingsModal
+          onClose={() => setShowSettingsModal(false)}
+          config={systemConfig}
+          onSaveConfig={(newConfig) => setSystemConfig(newConfig)}
+        />
+      )}
+    </div>
+  );
+}
