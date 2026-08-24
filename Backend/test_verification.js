@@ -1,19 +1,20 @@
-const { checkDns } = require('./Src/Services/dnsService');
-const { checkSsl } = require('./Src/Services/sslService');
-const { measurePerformance } = require('./Src/Services/performanceService');
-const { traceRedirects } = require('./Src/Services/redirectService');
-const { analyzeSecurity } = require('./Src/Services/securityService');
-const { analyzeSeo } = require('./Src/Services/seoService');
-const { analyzeResources } = require('./Src/Services/resourceService');
-const { analyzeLinks } = require('./Src/Services/linkService');
-const { analyzeContent } = require('./Src/Services/contentService');
-const { analyzeMobileReadiness } = require('./Src/Services/mobileService');
-const { testApiEndpoint } = require('./Src/Services/apiCheckService');
-const { runFullAnalysis } = require('./Src/Services/analyzerOrchestrator');
-const { normalizeUrl } = require('./Src/Utils/urlHelper');
+import { checkDns } from './Src/Services/dnsService.js';
+import { checkSsl } from './Src/Services/sslService.js';
+import { measurePerformance } from './Src/Services/performanceService.js';
+import { traceRedirects } from './Src/Services/redirectService.js';
+import { analyzeSecurity } from './Src/Services/securityService.js';
+import { analyzeSeo } from './Src/Services/seoService.js';
+import { analyzeResources } from './Src/Services/resourceService.js';
+import { analyzeLinks } from './Src/Services/linkService.js';
+import { analyzeContent } from './Src/Services/contentService.js';
+import { analyzeMobileReadiness } from './Src/Services/mobileService.js';
+import { testApiEndpoint } from './Src/Services/apiCheckService.js';
+import { runFullAnalysis } from './Src/Services/analyzerOrchestrator.js';
+import { normalizeUrl } from './Src/Utils/urlHelper.js';
+
 
 async function runTests() {
-  console.log('🧪 Starting Verification Suite for URL Analysis Backend...\n');
+  console.log(' Starting Verification Suite for URL Analysis Backend...\n');
 
   const testTarget = 'https://example.com';
   const norm = normalizeUrl(testTarget);
@@ -66,10 +67,10 @@ async function runTests() {
   const fullRes = await runFullAnalysis(norm, { checkBrowser: false });
   console.log('   Full Execution Time:', fullRes.executionTimeMs, 'ms | Available Modules:', Object.keys(fullRes.results));
 
-  console.log('\n✅ ALL 12 MODULE TEST SUITES PASSED SUCCESSFULLY!');
+  console.log('\n ALL 12 MODULE TEST SUITES PASSED SUCCESSFULLY!');
 }
 
 runTests().catch(err => {
-  console.error('❌ Test failed:', err);
+  console.error(' Test failed:', err);
   process.exit(1);
 });

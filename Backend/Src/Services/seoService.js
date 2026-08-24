@@ -1,7 +1,9 @@
-const cheerio = require('cheerio');
-const axios = require('axios');
-const config = require('../Config/config');
-const logger = require('../Utils/logger');
+import * as cheerio from 'cheerio';
+
+import axios from 'axios';
+import config from '../Config/config.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Checks for robots.txt on the root origin
@@ -185,8 +187,15 @@ async function analyzeSeo(html = '', currentUrl = '', origin = '') {
   };
 }
 
-module.exports = {
+export {
   analyzeSeo,
   checkRobotsTxt,
   checkSitemapXml
 };
+
+export default {
+  analyzeSeo,
+  checkRobotsTxt,
+  checkSitemapXml
+};
+

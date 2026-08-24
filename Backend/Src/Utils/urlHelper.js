@@ -1,11 +1,11 @@
-const { URL } = require('url');
+import { URL } from 'url';
 
 /**
  * Normalizes input URL by adding protocol if missing and validating.
  * @param {string} inputUrl
  * @returns {object} { valid: boolean, parsedUrl: URL|null, normalized: string, error?: string }
  */
-function normalizeUrl(inputUrl) {
+export function normalizeUrl(inputUrl) {
   if (!inputUrl || typeof inputUrl !== 'string') {
     return { valid: false, parsedUrl: null, normalized: '', error: 'URL is required' };
   }
@@ -47,7 +47,7 @@ function normalizeUrl(inputUrl) {
  * @param {string} inputUrl 
  * @returns {string}
  */
-function extractDomain(inputUrl) {
+export function extractDomain(inputUrl) {
   try {
     const raw = typeof inputUrl === 'string' ? inputUrl : (inputUrl?.normalized || '');
     const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw);
@@ -62,7 +62,7 @@ function extractDomain(inputUrl) {
  * @param {string} inputUrl 
  * @returns {string}
  */
-function extractHostname(inputUrl) {
+export function extractHostname(inputUrl) {
   try {
     const raw = typeof inputUrl === 'string' ? inputUrl : (inputUrl?.normalized || '');
     const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw);
@@ -77,7 +77,7 @@ function extractHostname(inputUrl) {
  * @param {string} inputUrl 
  * @returns {string}
  */
-function extractProtocol(inputUrl) {
+export function extractProtocol(inputUrl) {
   try {
     const raw = typeof inputUrl === 'string' ? inputUrl : (inputUrl?.normalized || '');
     const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw);
@@ -93,7 +93,7 @@ function extractProtocol(inputUrl) {
  * @param {string} baseUrl
  * @returns {string|null}
  */
-function resolveUrl(href, baseUrl) {
+export function resolveUrl(href, baseUrl) {
   if (!href || typeof href !== 'string') return null;
   const trimmed = href.trim();
   if (trimmed.startsWith('javascript:') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:') || trimmed.startsWith('#')) {
@@ -113,7 +113,7 @@ function resolveUrl(href, baseUrl) {
  * @param {string} baseOrigin
  * @returns {boolean}
  */
-function isInternalLink(targetUrl, baseOrigin) {
+export function isInternalLink(targetUrl, baseOrigin) {
   try {
     const target = new URL(targetUrl);
     const base = new URL(baseOrigin);
@@ -123,7 +123,7 @@ function isInternalLink(targetUrl, baseOrigin) {
   }
 }
 
-module.exports = {
+export default {
   normalizeUrl,
   extractDomain,
   extractHostname,
@@ -131,3 +131,4 @@ module.exports = {
   resolveUrl,
   isInternalLink
 };
+

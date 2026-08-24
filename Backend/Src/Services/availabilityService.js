@@ -1,6 +1,6 @@
-const axios = require('axios');
-const config = require('../Config/config');
-const logger = require('../Utils/logger');
+import axios from 'axios';
+import config from '../Config/config.js';
+import logger from '../Utils/logger.js';
 
 /**
  * Checks website availability, status code, HTTPS availability, and supported HTTP methods
@@ -8,7 +8,7 @@ const logger = require('../Utils/logger');
  * @param {object} [options={}]
  * @returns {Promise<object>}
  */
-async function checkAvailability(targetUrl, options = {}) {
+export async function checkAvailability(targetUrl, options = {}) {
   const urlObj = new URL(targetUrl);
   const timeout = options.timeout || config.defaultTimeout;
   const userAgent = options.userAgent || config.defaultUserAgent;
@@ -80,6 +80,7 @@ async function checkAvailability(targetUrl, options = {}) {
   return result;
 }
 
-module.exports = {
+export default {
   checkAvailability
 };
+

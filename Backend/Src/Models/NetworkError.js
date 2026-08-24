@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const networkErrorSchema = new mongoose.Schema(
   {
@@ -44,4 +44,5 @@ networkErrorSchema.index({ scanId: 1, resourceType: 1 });
 
 const NetworkError = mongoose.models.NetworkError || mongoose.model('NetworkError', networkErrorSchema);
 
-module.exports = NetworkError;
+export default NetworkError;
+

@@ -1,4 +1,4 @@
-const {
+import {
   CheckResult,
   ConsoleError,
   NetworkError,
@@ -9,8 +9,9 @@ const {
   SeoResult,
   AccessibilityResult,
   TechnologyResult
-} = require('../Models');
-const logger = require('../Utils/logger');
+} from '../Models/index.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Persists all granular audit findings into separate normalized MongoDB collections
@@ -18,7 +19,8 @@ const logger = require('../Utils/logger');
  * @param {object} rawResults Raw outputs from all 18 check analyzers
  * @param {object} scores Computed domain scores
  */
-async function persistScanResults(scan, rawResults, scores) {
+export async function persistScanResults(scan, rawResults, scores) {
+
   const scanId = scan._id;
   const websiteId = scan.websiteId;
 
@@ -337,6 +339,7 @@ async function persistScanResults(scan, rawResults, scores) {
   await Promise.all(persistencePromises);
 }
 
-module.exports = {
+export default {
   persistScanResults
 };
+

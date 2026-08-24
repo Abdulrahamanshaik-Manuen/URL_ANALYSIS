@@ -1,12 +1,16 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const path = require('path');
-const fs = require('fs');
-const config = require('./Src/Config/config');
-const { connectDB, closeDB } = require('./Src/Config/database');
-const apiRoutes = require('./Src/Routes/index');
-const logger = require('./Src/Utils/logger');
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import config from './Src/Config/config.js';
+import { connectDB, closeDB } from './Src/Config/database.js';
+import apiRoutes from './Src/Routes/index.js';
+import logger from './Src/Utils/logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -89,21 +93,23 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || config.port || 5000;
 let server = null;
 
-async function startServer() {
+export async function startServer() {
   // 1. Establish MongoDB connection
   await connectDB();
 
   // 2. Start HTTP Server
-  server = app.listen(PORT, '0.0.0.0', () => {});
+  server = app.listen(PORT, '0.0.0.0', () => {
+    logger.info(` Server listening on port ${PORT}`);
+  });
 
   // Handle server 'error' events (such as port in use)
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      logger.error(`❌ Port ${PORT} is already in use by another process!`);
+      logger.error(` Port ${PORT} is already in use by another process!`);
       logger.warn(`Please stop the process using port ${PORT} or configure a different PORT in .env`);
       process.exit(1);
     } else {
-      logger.error(`❌ Server socket error: ${err.message}`, err.stack);
+      logger.error(` Server socket error: ${err.message}`, err.stack);
       process.exit(1);
     }
   });
@@ -111,7 +117,8 @@ async function startServer() {
   return server;
 }
 
-if (require.main === module || !module.parent) {
+const isMainModule = process.argv[1] && (path.resolve(process.argv[1]) === __filename);
+if (isMainModule) {
   startServer();
 }
 
@@ -148,4 +155,6 @@ process.on('unhandledRejection', (reason) => {
   logger.error('Unhandled Promise Rejection:', reason);
 });
 
-module.exports = app;
+export { app };
+export default app;
+

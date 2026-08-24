@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const checkResultSchema = new mongoose.Schema(
   {
@@ -98,4 +98,5 @@ checkResultSchema.index({ scanId: 1, severity: 1 });
 
 const CheckResult = mongoose.models.CheckResult || mongoose.model('CheckResult', checkResultSchema);
 
-module.exports = CheckResult;
+export default CheckResult;
+

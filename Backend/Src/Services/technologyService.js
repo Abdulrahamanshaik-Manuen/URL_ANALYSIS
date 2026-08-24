@@ -1,4 +1,6 @@
-const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
+
+
 
 /**
  * Detects technologies, server, CMS, frameworks, libraries, analytics, and CDNs
@@ -7,7 +9,8 @@ const cheerio = require('cheerio');
  * @param {string} targetUrl
  * @returns {object}
  */
-function detectTechnologies(headers = {}, html = '', targetUrl = '') {
+export function detectTechnologies(headers = {}, html = '', targetUrl = '') {
+
   const $ = cheerio.load(html || '');
   const lowerHeaders = {};
   Object.keys(headers).forEach(k => {
@@ -179,6 +182,7 @@ function detectTechnologies(headers = {}, html = '', targetUrl = '') {
   };
 }
 
-module.exports = {
+export default {
   detectTechnologies
 };
+

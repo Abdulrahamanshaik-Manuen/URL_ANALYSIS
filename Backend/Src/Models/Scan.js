@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const scanSchema = new mongoose.Schema(
   {
@@ -128,4 +128,5 @@ scanSchema.index({ normalizedUrl: 1, createdAt: -1 });
 
 const Scan = mongoose.models.Scan || mongoose.model('Scan', scanSchema);
 
-module.exports = Scan;
+export default Scan;
+

@@ -1,7 +1,8 @@
-const { executeScan } = require('../Services/scanService');
-const { runFullAnalysis } = require('../Services/analyzerOrchestrator');
-const { formatAnalysisResponse } = require('../Utils/responseFormatter');
-const logger = require('../Utils/logger');
+import { executeScan } from '../Services/scanService.js';
+import { runFullAnalysis } from '../Services/analyzerOrchestrator.js';
+import { formatAnalysisResponse } from '../Utils/responseFormatter.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Standard REST API endpoint for comprehensive URL analysis with MongoDB persistence
@@ -81,7 +82,13 @@ async function streamAnalyzeUrl(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   analyzeUrl,
   streamAnalyzeUrl
 };
+
+export default {
+  analyzeUrl,
+  streamAnalyzeUrl
+};
+

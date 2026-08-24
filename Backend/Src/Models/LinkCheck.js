@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const linkCheckSchema = new mongoose.Schema(
   {
@@ -64,4 +64,5 @@ linkCheckSchema.index({ scanId: 1, linkType: 1 });
 
 const LinkCheck = mongoose.models.LinkCheck || mongoose.model('LinkCheck', linkCheckSchema);
 
-module.exports = LinkCheck;
+export default LinkCheck;
+

@@ -1,4 +1,5 @@
-const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
+
 
 /**
  * Performs accessibility (a11y) audit on HTML
@@ -6,7 +7,7 @@ const cheerio = require('cheerio');
  * @param {string} baseUrl
  * @returns {object}
  */
-function analyzeAccessibility(html = '', baseUrl = '') {
+export function analyzeAccessibility(html = '', baseUrl = '') {
   const $ = cheerio.load(html || '');
   const issues = [];
   const passed = [];
@@ -186,6 +187,7 @@ function analyzeAccessibility(html = '', baseUrl = '') {
   };
 }
 
-module.exports = {
+export default {
   analyzeAccessibility
 };
+

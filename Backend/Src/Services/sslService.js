@@ -1,5 +1,6 @@
-const tls = require('tls');
-const logger = require('../Utils/logger');
+import tls from 'tls';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Validates whether the domain matches certificate CN or SANs (including wildcards)
@@ -34,7 +35,8 @@ function checkDomainMatch(domain, sanList = [], cn = '') {
  * @param {number} [timeout=10000]
  * @returns {Promise<object>}
  */
-function checkSsl(hostname, port = 443, timeout = 10000) {
+export function checkSsl(hostname, port = 443, timeout = 10000) {
+
   return new Promise((resolve) => {
     const result = {
       valid: false,
@@ -146,6 +148,7 @@ function checkSsl(hostname, port = 443, timeout = 10000) {
   });
 }
 
-module.exports = {
+export default {
   checkSsl
 };
+

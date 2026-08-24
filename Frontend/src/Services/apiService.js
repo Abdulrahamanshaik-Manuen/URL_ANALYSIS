@@ -342,6 +342,27 @@ export async function crawlWebsite(url, maxPages = 25) {
 }
 
 /**
+ * Bulk Multi-URL Website Analysis
+ * @param {Array<string>} urls
+ * @param {number} maxPagesPerSite
+ */
+export async function bulkAnalyzeWebsites(urls, maxPagesPerSite = 5) {
+  const response = await smartFetch('/api/bulk-analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ urls, maxPagesPerSite })
+  });
+
+  const json = await parseResponseBody(response);
+  if (!response.ok) {
+    const errMsg = json.message || json.error || (json.rawText ? json.rawText.slice(0, 150) : null) || `Bulk analysis failed with HTTP ${response.status}`;
+    throw new Error(errMsg);
+  }
+  return json;
+}
+
+/**
+
  * Quick Micro-Check (dns, ssl, ping, security)
  * @param {string} type
  * @param {string} url
@@ -358,4 +379,6 @@ export async function runQuickCheck(type, url) {
   }
   return json;
 }
+
+
 

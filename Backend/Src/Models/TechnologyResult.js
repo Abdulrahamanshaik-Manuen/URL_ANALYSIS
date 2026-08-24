@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const technologyResultSchema = new mongoose.Schema(
   {
@@ -43,4 +43,5 @@ const technologyResultSchema = new mongoose.Schema(
 
 const TechnologyResult = mongoose.models.TechnologyResult || mongoose.model('TechnologyResult', technologyResultSchema);
 
-module.exports = TechnologyResult;
+export default TechnologyResult;
+

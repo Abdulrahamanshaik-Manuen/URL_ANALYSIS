@@ -4,7 +4,8 @@
  * @param {boolean} isHttps
  * @returns {object}
  */
-function auditCookies(setCookieHeaders, isHttps = true) {
+export function auditCookies(setCookieHeaders, isHttps = true) {
+
   if (!setCookieHeaders) {
     return {
       count: 0,
@@ -107,6 +108,7 @@ function auditCookies(setCookieHeaders, isHttps = true) {
   };
 }
 
-module.exports = {
+export default {
   auditCookies
 };
+

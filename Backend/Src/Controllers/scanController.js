@@ -1,4 +1,4 @@
-const {
+import {
   Scan,
   CheckResult,
   ConsoleError,
@@ -9,7 +9,8 @@ const {
   SeoResult,
   AccessibilityResult,
   TechnologyResult
-} = require('../Models');
+} from '../Models/index.js';
+
 
 /**
  * Retrieves a single scan document by ID
@@ -237,7 +238,7 @@ async function getScanAccessibility(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getScanById,
   getScanChecks,
   getScanErrorsOverview,
@@ -249,3 +250,17 @@ module.exports = {
   getScanSeo,
   getScanAccessibility
 };
+
+export default {
+  getScanById,
+  getScanChecks,
+  getScanErrorsOverview,
+  getScanConsoleErrors,
+  getScanNetworkErrors,
+  getScanHttpErrors,
+  getScanPerformance,
+  getScanSecurity,
+  getScanSeo,
+  getScanAccessibility
+};
+

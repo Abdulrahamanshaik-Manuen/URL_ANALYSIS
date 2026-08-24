@@ -1,8 +1,10 @@
-const cheerio = require('cheerio');
-const axios = require('axios');
-const { resolveUrl, isInternalLink } = require('../Utils/urlHelper');
-const config = require('../Config/config');
-const logger = require('../Utils/logger');
+import * as cheerio from 'cheerio';
+
+import axios from 'axios';
+import { resolveUrl, isInternalLink } from '../Utils/urlHelper.js';
+import config from '../Config/config.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Validates links with concurrency control
@@ -163,6 +165,14 @@ async function analyzeLinks(html = '', baseUrl = '', checkStatus = true) {
   };
 }
 
-module.exports = {
-  analyzeLinks
+export {
+  analyzeLinks,
+  checkBrokenLinks
 };
+
+export default {
+  analyzeLinks,
+  checkBrokenLinks
+};
+
+

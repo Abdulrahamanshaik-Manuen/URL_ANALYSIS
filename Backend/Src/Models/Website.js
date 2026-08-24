@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const websiteSchema = new mongoose.Schema(
   {
@@ -82,4 +82,5 @@ websiteSchema.index({ domain: 1, createdAt: -1 });
 
 const Website = mongoose.models.Website || mongoose.model('Website', websiteSchema);
 
-module.exports = Website;
+export default Website;
+

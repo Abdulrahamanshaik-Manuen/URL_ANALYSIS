@@ -1,12 +1,12 @@
-const { executeWebsiteCrawl } = require('../Services/crawlerService');
-const { SiteCrawl } = require('../Models');
-const logger = require('../Utils/logger');
+import { executeWebsiteCrawl } from '../Services/crawlerService.js';
+import { SiteCrawl } from '../Models/index.js';
+import logger from '../Utils/logger.js';
 
 /**
  * Standard REST endpoint for full website crawl
  * POST /api/crawl
  */
-async function crawlWebsite(req, res, next) {
+export async function crawlWebsite(req, res, next) {
   try {
     const rawUrl = req.normalizedUrl?.normalized || req.body?.url;
     const maxPages = req.body?.maxPages || 20;
@@ -31,7 +31,7 @@ async function crawlWebsite(req, res, next) {
  * Real-time SSE streaming endpoint for website crawl
  * POST /api/crawl/stream
  */
-async function streamCrawlWebsite(req, res, next) {
+export async function streamCrawlWebsite(req, res, next) {
   try {
     const rawUrl = req.normalizedUrl?.normalized || req.body?.url;
     const maxPages = req.body?.maxPages || 20;
@@ -71,7 +71,7 @@ async function streamCrawlWebsite(req, res, next) {
  * Retrieves crawl history from MongoDB
  * GET /api/crawl/history
  */
-async function getCrawlHistory(req, res, next) {
+export async function getCrawlHistory(req, res, next) {
   try {
     const limit = Math.min(50, parseInt(req.query.limit) || 10);
     const domain = req.query.domain;
@@ -96,8 +96,9 @@ async function getCrawlHistory(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   crawlWebsite,
   streamCrawlWebsite,
   getCrawlHistory
 };
+

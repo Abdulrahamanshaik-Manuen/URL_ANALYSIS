@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const monitoringSchema = new mongoose.Schema(
   {
@@ -54,4 +54,5 @@ monitoringSchema.index({ enabled: 1, nextRunAt: 1 });
 
 const Monitoring = mongoose.models.Monitoring || mongoose.model('Monitoring', monitoringSchema);
 
-module.exports = Monitoring;
+export default Monitoring;
+

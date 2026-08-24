@@ -1,10 +1,10 @@
-const { testApiEndpoint } = require('../Services/apiCheckService');
-const logger = require('../Utils/logger');
+import { testApiEndpoint } from '../Services/apiCheckService.js';
+import logger from '../Utils/logger.js';
 
 /**
  * Controller for dedicated API / Endpoint testing
  */
-async function handleApiTest(req, res) {
+export async function handleApiTest(req, res) {
   try {
     const { url, method = 'GET', headers, body, auth, timeout } = req.body;
     const normalizedUrl = req.normalizedUrl;
@@ -34,6 +34,7 @@ async function handleApiTest(req, res) {
   }
 }
 
-module.exports = {
+export default {
   handleApiTest
 };
+

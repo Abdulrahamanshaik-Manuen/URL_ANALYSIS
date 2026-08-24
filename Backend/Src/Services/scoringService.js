@@ -145,8 +145,15 @@ function computeScores(rawResults = {}) {
   };
 }
 
-module.exports = {
+export {
   calculateGrade,
   calculateHealthStatus,
   computeScores
 };
+
+export default {
+  calculateGrade,
+  calculateHealthStatus,
+  computeScores
+};
+

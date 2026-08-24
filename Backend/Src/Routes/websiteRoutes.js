@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as websiteController from '../Controllers/websiteController.js';
+
 const router = express.Router();
-const websiteController = require('../Controllers/websiteController');
 
 // GET /api/websites - List websites with pagination & search
 router.get('/', websiteController.getWebsites);
@@ -14,4 +15,5 @@ router.get('/:id/scans', websiteController.getWebsiteScans);
 // DELETE /api/websites/:id - Delete website and cascade delete scans
 router.delete('/:id', websiteController.deleteWebsite);
 
-module.exports = router;
+export default router;
+

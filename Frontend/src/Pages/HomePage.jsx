@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from '../components/Sidebar';
+import BulkAnalyzerTab from '../components/BulkAnalyzerTab';
+import HistoryView from '../components/HistoryView';
+
 import Navbar from '../components/Navbar';
 import UrlInputBar from '../components/UrlInputBar';
 import LiveProgress from '../components/LiveProgress';
@@ -23,6 +27,7 @@ import QuickChecksTab from '../components/QuickChecksTab';
 import PagesTab from '../components/PagesTab';
 import ExportModal from '../components/ExportModal';
 import HistoryModal from '../components/HistoryModal';
+
 
 import {
   checkBackendHealth,
@@ -55,8 +60,11 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
+  const [activeView, setActiveView] = useState('auditor'); // 'auditor' | 'bulk' | 'history' | 'quick' | 'api-tester' | 'settings'
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [backendStatus, setBackendStatus] = useState('checking');
+
   const [url, setUrl] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(false);
@@ -287,127 +295,186 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="app-container">
+    <div className="app-layout-wrapper">
       <div className="ambient-glow-1"></div>
       <div className="ambient-glow-2"></div>
 
-      {/* Navbar */}
-      <Navbar
+      {/* Left Navigation Sidebar */}
+      <Sidebar
+        activeView={activeView}
+        setActiveView={(view) => {
+          if (view === 'settings') {
+            setShowSettingsModal(true);
+          } else {
+            setActiveView(view);
+          }
+        }}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
         backendStatus={backendStatus}
-        theme={theme}
-        onToggleTheme={handleToggleTheme}
-        onOpenExport={() => setShowExportModal(true)}
-        onOpenSettings={() => setShowSettingsModal(true)}
-        onOpenHistory={() => setShowHistoryModal(true)}
-        hasData={!!auditData}
       />
 
-      {/* Hero URL Input Bar */}
-      <UrlInputBar
-        url={url}
-        setUrl={setUrl}
-        onAnalyze={handleAnalyze}
-        onCrawl={handleCrawl}
-        isLoading={isLoading}
-        scanMode={scanMode}
-        setScanMode={setScanMode}
-        options={options}
-        setOptions={setOptions}
-        advanced={advanced}
-        setAdvanced={setAdvanced}
-      />
-
-      {/* Crawl Live Progress Widget */}
-      {isCrawling && (
-        <CrawlProgressCard crawlState={crawlState} />
-      )}
-
-      {/* Fixed Real-Time Live Analysis Progress Card */}
-      {!isCrawling && (
-        <LiveProgress
-          currentStep={currentStep}
-          activeSteps={activeSteps}
-          isLoading={isLoading}
+      {/* Main Content Area */}
+      <div className="main-content-wrapper">
+        {/* Top Navbar */}
+        <Navbar
+          backendStatus={backendStatus}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
+          onOpenExport={() => setShowExportModal(true)}
+          onOpenSettings={() => setShowSettingsModal(true)}
+          onOpenHistory={() => setActiveView('history')}
           hasData={!!auditData}
         />
-      )}
 
-      {/* Error Alert */}
-      {errorMessage && (
-        <div
-          className="card"
-          style={{
-            borderLeft: '4px solid var(--danger)',
-            background: 'var(--danger-bg)',
-            marginBottom: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}
-        >
-          <AlertCircle size={24} style={{ color: 'var(--danger)', flexShrink: 0 }} />
-          <div>
-            <strong style={{ color: 'var(--danger)' }}>Action Failed</strong>
-            <p style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{errorMessage}</p>
-          </div>
-        </div>
-      )}
+        <div style={{ marginTop: '16px' }}>
 
-      {/* Fixed 18-Domain Navigation Tabs */}
-      <div className="tabs-navigation-wrapper">
-        <div className="tabs-list">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+          {/* VIEW 1: Full Website Auditor */}
+          {activeView === 'auditor' && (
+            <>
+              {/* Hero URL Input Bar */}
+              <UrlInputBar
+                url={url}
+                setUrl={setUrl}
+                onAnalyze={handleAnalyze}
+                onCrawl={handleCrawl}
+                isLoading={isLoading}
+                scanMode={scanMode}
+                setScanMode={setScanMode}
+                options={options}
+                setOptions={setOptions}
+                advanced={advanced}
+                setAdvanced={setAdvanced}
+              />
 
-            return (
-              <button
-                key={tab.id}
-                className={`tab-btn ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <Icon size={16} />
-                <span>{tab.label}</span>
-                {tab.badge !== null && tab.badge !== undefined && (
-                  <span className={`tab-badge ${tab.badgeType || ''}`}>
-                    {tab.badge}
-                  </span>
+              {/* Crawl Live Progress Widget */}
+              {isCrawling && <CrawlProgressCard crawlState={crawlState} />}
+
+              {/* Fixed Real-Time Live Analysis Progress Card */}
+              {!isCrawling && (
+                <LiveProgress
+                  currentStep={currentStep}
+                  activeSteps={activeSteps}
+                  isLoading={isLoading}
+                  hasData={!!auditData}
+                />
+              )}
+
+              {/* Error Alert */}
+              {errorMessage && (
+                <div
+                  className="card"
+                  style={{
+                    borderLeft: '4px solid var(--danger)',
+                    background: 'var(--danger-bg)',
+                    marginBottom: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}
+                >
+                  <AlertCircle size={24} style={{ color: 'var(--danger)', flexShrink: 0 }} />
+                  <div>
+                    <strong style={{ color: 'var(--danger)' }}>Action Failed</strong>
+                    <p style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{errorMessage}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Fixed 18-Domain Navigation Tabs */}
+              <div className="tabs-navigation-wrapper">
+                <div className="tabs-list">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+
+                    return (
+                      <button
+                        key={tab.id}
+                        className={`tab-btn ${isActive ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                      >
+                        <Icon size={16} />
+                        <span>{tab.label}</span>
+                        {tab.badge !== null && tab.badge !== undefined && (
+                          <span className={`tab-badge ${tab.badgeType || ''}`}>
+                            {tab.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Active Tab Content */}
+              <main>
+                {activeTab === 'overview' && <OverviewTab data={auditData} isLoading={isLoading} />}
+                {activeTab === 'http' && <HttpNetworkTab data={auditData} />}
+                {activeTab === 'pages' && (
+                  <PagesTab
+                    pages={crawledPages}
+                    siteHealthScore={crawlState.siteHealthScore}
+                    onInspectPage={(pageData) => {
+                      setAuditData(pageData);
+                      setActiveTab('overview');
+                    }}
+                  />
                 )}
-              </button>
-            );
-          })}
+                {activeTab === 'errors' && <ErrorsTab data={auditData} />}
+                {activeTab === 'performance' && <PerformanceTab data={auditData} />}
+                {activeTab === 'security' && <SecurityTab data={auditData} />}
+                {activeTab === 'cookies' && <CookiesTab data={auditData} />}
+                {activeTab === 'seo' && <SeoTab data={auditData} />}
+                {activeTab === 'robots' && <RobotsSitemapTab data={auditData} />}
+                {activeTab === 'content' && <ContentTab data={auditData} />}
+                {activeTab === 'a11y' && <AccessibilityTab data={auditData} />}
+                {activeTab === 'links' && <LinksTab data={auditData} />}
+                {activeTab === 'assets' && <AssetsTab data={auditData} />}
+                {activeTab === 'responsive' && <ResponsiveTab data={auditData} />}
+                {activeTab === 'tech' && <TechnologyTab data={auditData} />}
+                {activeTab === 'api' && <ApiTesterTab initialUrl={url} />}
+                {activeTab === 'quick' && <QuickChecksTab currentUrl={url} />}
+              </main>
+            </>
+          )}
+
+          {/* VIEW 2: Multi-URL Batch Auditor */}
+          {activeView === 'bulk' && (
+            <BulkAnalyzerTab
+              onLoadReport={(fullDetails, reportDoc) => {
+                setAuditData(fullDetails);
+                if (reportDoc?.targetUrl || reportDoc?.startUrl) {
+                  setUrl(reportDoc.targetUrl || reportDoc.startUrl);
+                }
+                setActiveView('auditor');
+                setActiveTab('overview');
+              }}
+            />
+          )}
+
+          {/* VIEW 3: Audit History & Sites View */}
+          {activeView === 'history' && (
+            <HistoryView
+              onLoadReport={(fullDetails, reportDoc) => {
+                setAuditData(fullDetails);
+                if (reportDoc?.targetUrl) setUrl(reportDoc.targetUrl);
+                if (reportDoc?.crawledPages && reportDoc.crawledPages.length > 0) {
+                  setCrawledPages(reportDoc.crawledPages);
+                }
+                setActiveView('auditor');
+                setActiveTab('overview');
+              }}
+            />
+          )}
+
+          {/* VIEW 4: Micro Checks Suite */}
+          {activeView === 'quick' && <QuickChecksTab currentUrl={url} />}
+
+          {/* VIEW 5: API Endpoint Tester */}
+          {activeView === 'api-tester' && <ApiTesterTab initialUrl={url} />}
         </div>
       </div>
-
-      {/* Fixed Active Tab View */}
-      <main>
-        {activeTab === 'overview' && <OverviewTab data={auditData} isLoading={isLoading} />}
-        {activeTab === 'http' && <HttpNetworkTab data={auditData} />}
-        {activeTab === 'pages' && (
-          <PagesTab
-            pages={crawledPages}
-            siteHealthScore={crawlState.siteHealthScore}
-            onInspectPage={(pageData) => {
-              setAuditData(pageData);
-              setActiveTab('overview');
-            }}
-          />
-        )}
-        {activeTab === 'errors' && <ErrorsTab data={auditData} />}
-        {activeTab === 'performance' && <PerformanceTab data={auditData} />}
-        {activeTab === 'security' && <SecurityTab data={auditData} />}
-        {activeTab === 'cookies' && <CookiesTab data={auditData} />}
-        {activeTab === 'seo' && <SeoTab data={auditData} />}
-        {activeTab === 'robots' && <RobotsSitemapTab data={auditData} />}
-        {activeTab === 'content' && <ContentTab data={auditData} />}
-        {activeTab === 'a11y' && <AccessibilityTab data={auditData} />}
-        {activeTab === 'links' && <LinksTab data={auditData} />}
-        {activeTab === 'assets' && <AssetsTab data={auditData} />}
-        {activeTab === 'responsive' && <ResponsiveTab data={auditData} />}
-        {activeTab === 'tech' && <TechnologyTab data={auditData} />}
-        {activeTab === 'api' && <ApiTesterTab initialUrl={url} />}
-        {activeTab === 'quick' && <QuickChecksTab currentUrl={url} />}
-      </main>
 
       {/* Export Report Modal */}
       {showExportModal && auditData && (
@@ -436,6 +503,7 @@ export default function HomePage() {
             if (reportDoc?.crawledPages && reportDoc.crawledPages.length > 0) {
               setCrawledPages(reportDoc.crawledPages);
             }
+            setActiveView('auditor');
             setActiveTab('overview');
           }}
         />
@@ -443,3 +511,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+

@@ -1,13 +1,15 @@
-const dns = require('dns').promises;
-const { performance } = require('perf_hooks');
-const logger = require('../Utils/logger');
+import dns from 'dns';
+import { performance } from 'perf_hooks';
+import logger from '../Utils/logger.js';
+
+const dnsPromises = dns.promises;
 
 /**
  * Performs complete DNS inspection for a given hostname
  * @param {string} hostname
  * @returns {Promise<object>}
  */
-async function checkDns(hostname) {
+export async function checkDns(hostname) {
   const result = {
     resolved: false,
     hostname,
@@ -43,14 +45,14 @@ async function checkDns(hostname) {
 
   try {
     const [a, aaaa, cname, mx, ns, txt, caa, soa] = await Promise.all([
-      safeResolve('A', () => dns.resolve4(hostname)),
-      safeResolve('AAAA', () => dns.resolve6(hostname)),
-      safeResolve('CNAME', () => dns.resolveCname(hostname)),
-      safeResolve('MX', () => dns.resolveMx(hostname)),
-      safeResolve('NS', () => dns.resolveNs(hostname)),
-      safeResolve('TXT', () => dns.resolveTxt(hostname)),
-      safeResolve('CAA', () => dns.resolveCaa(hostname)),
-      safeResolve('SOA', () => dns.resolveSoa(hostname))
+      safeResolve('A', () => dnsPromises.resolve4(hostname)),
+      safeResolve('AAAA', () => dnsPromises.resolve6(hostname)),
+      safeResolve('CNAME', () => dnsPromises.resolveCname(hostname)),
+      safeResolve('MX', () => dnsPromises.resolveMx(hostname)),
+      safeResolve('NS', () => dnsPromises.resolveNs(hostname)),
+      safeResolve('TXT', () => dnsPromises.resolveTxt(hostname)),
+      safeResolve('CAA', () => dnsPromises.resolveCaa(hostname)),
+      safeResolve('SOA', () => dnsPromises.resolveSoa(hostname))
     ]);
 
     result.responseTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
@@ -83,6 +85,7 @@ async function checkDns(hostname) {
   return result;
 }
 
-module.exports = {
+export default {
   checkDns
 };
+

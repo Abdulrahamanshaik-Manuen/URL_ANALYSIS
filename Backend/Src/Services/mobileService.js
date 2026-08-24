@@ -1,11 +1,12 @@
-const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
+
 
 /**
  * Checks mobile readiness from HTML and viewport meta tags
  * @param {string} html
  * @returns {object}
  */
-function analyzeMobileReadiness(html = '') {
+export function analyzeMobileReadiness(html = '') {
   const $ = cheerio.load(html || '');
 
   const viewportMeta = $('meta[name="viewport" i]').attr('content') || null;
@@ -43,6 +44,7 @@ function analyzeMobileReadiness(html = '') {
   };
 }
 
-module.exports = {
+export default {
   analyzeMobileReadiness
 };
+

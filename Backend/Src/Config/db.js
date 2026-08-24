@@ -6,15 +6,15 @@ const MONGO_URI = process.env.MONGO_URI;
 
 export async function connectDB() {
   if (!MONGO_URI) {
-    console.error('✗ MONGO_URI environment variable is missing from .env');
+    console.error(' MONGO_URI environment variable is missing from .env');
     return null;
   }
   try {
     const conn = await mongoose.connect(MONGO_URI);
-    console.log(`✓ MongoDB Atlas Connected successfully to host: ${conn.connection.host}`);
+    console.log(` MongoDB Atlas Connected successfully to host: ${conn.connection.host}`);
     return conn;
   } catch (err) {
-    console.error('✗ MongoDB Atlas Connection Failure:', err.message);
+    console.error(' MongoDB Atlas Connection Failure:', err.message);
     return null;
   }
 }

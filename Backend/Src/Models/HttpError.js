@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const httpErrorSchema = new mongoose.Schema(
   {
@@ -59,4 +59,5 @@ httpErrorSchema.index({ scanId: 1, statusCode: 1 });
 
 const HttpError = mongoose.models.HttpError || mongoose.model('HttpError', httpErrorSchema);
 
-module.exports = HttpError;
+export default HttpError;
+

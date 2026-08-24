@@ -1,8 +1,9 @@
-const http = require('http');
-const https = require('https');
-const config = require('../Config/config');
-const { resolveUrl } = require('../Utils/urlHelper');
-const logger = require('../Utils/logger');
+import http from 'http';
+import https from 'https';
+import config from '../Config/config.js';
+import { resolveUrl } from '../Utils/urlHelper.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Performs a single HTTP/HTTPS request without auto-following redirects
@@ -88,7 +89,8 @@ function fetchSingleStep(currentUrl, options = {}) {
  * @param {object} [options={}]
  * @returns {Promise<object>}
  */
-async function traceRedirects(initialUrl, options = {}) {
+export async function traceRedirects(initialUrl, options = {}) {
+
   const maxRedirects = options.maxRedirects || config.maxRedirects;
   const chain = [];
   const visited = new Set();
@@ -153,6 +155,7 @@ async function traceRedirects(initialUrl, options = {}) {
   };
 }
 
-module.exports = {
+export default {
   traceRedirects
 };
+

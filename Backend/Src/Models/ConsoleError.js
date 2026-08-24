@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const consoleErrorSchema = new mongoose.Schema(
   {
@@ -47,4 +47,5 @@ consoleErrorSchema.index({ scanId: 1, type: 1 });
 
 const ConsoleError = mongoose.models.ConsoleError || mongoose.model('ConsoleError', consoleErrorSchema);
 
-module.exports = ConsoleError;
+export default ConsoleError;
+

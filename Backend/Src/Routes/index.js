@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const analyzeRoutes = require('./analyzeRoutes');
-const websiteRoutes = require('./websiteRoutes');
-const scanRoutes = require('./scanRoutes');
-const crawlRoutes = require('./crawlRoutes');
+import express from 'express';
+import analyzeRoutes from './analyzeRoutes.js';
+import websiteRoutes from './websiteRoutes.js';
+import scanRoutes from './scanRoutes.js';
+import crawlRoutes from './crawlRoutes.js';
+import * as historyController from '../Controllers/historyController.js';
 
-const historyController = require('../Controllers/historyController');
+const router = express.Router();
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -30,4 +30,5 @@ router.use('/scans', scanRoutes);
 router.use('/crawl', crawlRoutes);
 router.use('/', analyzeRoutes);
 
-module.exports = router;
+export default router;
+

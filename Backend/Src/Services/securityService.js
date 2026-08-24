@@ -1,4 +1,6 @@
-const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
+
+
 
 /**
  * Parses Set-Cookie header strings into structured cookie audit objects
@@ -203,8 +205,15 @@ function analyzeSecurity(headers = {}, html = '', targetUrl = '') {
   };
 }
 
-module.exports = {
+export {
   analyzeSecurity,
   parseCookies,
   checkMixedContent
 };
+
+export default {
+  analyzeSecurity,
+  parseCookies,
+  checkMixedContent
+};
+

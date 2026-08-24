@@ -1,8 +1,9 @@
-const axios = require('axios');
-const app = require('./Server');
+import axios from 'axios';
+import app from './Server.js';
+
 
 async function testLiveServer() {
-  console.log('🌐 Testing Express Live Endpoints...');
+  console.log(' Testing Express Live Endpoints...');
   const baseUrl = 'http://localhost:5000/api';
 
   try {
@@ -29,10 +30,10 @@ async function testLiveServer() {
     const quickSsl = await axios.get(`${baseUrl}/quick-check/ssl?url=https://example.com`);
     console.log('   SSL Valid:', quickSsl.data.data.valid, '| Days Remaining:', quickSsl.data.data.daysRemaining);
 
-    console.log('\n🎉 ALL LIVE SERVER ENDPOINT TESTS PASSED WITH 200 OK!');
+    console.log('\n ALL LIVE SERVER ENDPOINT TESTS PASSED WITH 200 OK!');
     process.exit(0);
   } catch (err) {
-    console.error('❌ Server Live Test Failed:', err.response ? err.response.data : err.message);
+    console.error(' Server Live Test Failed:', err.response ? err.response.data : err.message);
     process.exit(1);
   }
 }

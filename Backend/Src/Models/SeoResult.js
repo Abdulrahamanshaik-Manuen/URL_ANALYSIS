@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const seoResultSchema = new mongoose.Schema(
   {
@@ -89,4 +89,5 @@ const seoResultSchema = new mongoose.Schema(
 
 const SeoResult = mongoose.models.SeoResult || mongoose.model('SeoResult', seoResultSchema);
 
-module.exports = SeoResult;
+export default SeoResult;
+

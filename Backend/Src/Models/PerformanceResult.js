@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const performanceResultSchema = new mongoose.Schema(
   {
@@ -75,4 +75,5 @@ const performanceResultSchema = new mongoose.Schema(
 
 const PerformanceResult = mongoose.models.PerformanceResult || mongoose.model('PerformanceResult', performanceResultSchema);
 
-module.exports = PerformanceResult;
+export default PerformanceResult;
+

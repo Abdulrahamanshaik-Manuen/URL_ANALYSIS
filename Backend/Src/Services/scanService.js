@@ -1,12 +1,13 @@
-const { Website, Scan } = require('../Models');
-const AuditReport = require('../Models/AuditReport').default || require('../Models/AuditReport');
-const { uploadScreenshotToCloudinary } = require('./cloudinaryService');
-const { runFullAnalysis } = require('./analyzerOrchestrator');
-const { computeScores } = require('./scoringService');
-const { persistScanResults } = require('./resultPersistenceService');
-const { normalizeUrl, extractDomain, extractHostname, extractProtocol } = require('../Utils/urlHelper');
-const { formatAnalysisResponse } = require('../Utils/responseFormatter');
-const logger = require('../Utils/logger');
+import { Website, Scan } from '../Models/index.js';
+import AuditReport from '../Models/AuditReport.js';
+import { uploadScreenshotToCloudinary } from './cloudinaryService.js';
+import { runFullAnalysis } from './analyzerOrchestrator.js';
+import { computeScores } from './scoringService.js';
+import { persistScanResults } from './resultPersistenceService.js';
+import { normalizeUrl, extractDomain, extractHostname, extractProtocol } from '../Utils/urlHelper.js';
+import { formatAnalysisResponse } from '../Utils/responseFormatter.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Orchestrates a complete scan lifecycle and MongoDB persistence
@@ -14,7 +15,8 @@ const logger = require('../Utils/logger');
  * @param {object} [options={}] Options like userId, scanType, custom headers
  * @returns {Promise<object>} Structured response object
  */
-async function executeScan(targetUrl, options = {}) {
+export async function executeScan(targetUrl, options = {}) {
+
   const startTime = Date.now();
   const normObj = typeof targetUrl === 'object' && targetUrl.normalized ? targetUrl : normalizeUrl(targetUrl);
   const normalized = normObj.normalized || (typeof targetUrl === 'string' ? targetUrl : 'https://example.com');
@@ -204,7 +206,7 @@ async function executeScan(targetUrl, options = {}) {
         screenshotUrl: screenshotUrl || null,
         fullDetails: formatted
       });
-      logger.success(`✓ AuditReport saved to MongoDB Atlas for ${normalized}`);
+      logger.success(` AuditReport saved to MongoDB Atlas for ${normalized}`);
     } catch (auditErr) {
       logger.warn(`AuditReport MongoDB save notice: ${auditErr.message}`);
     }
@@ -232,6 +234,7 @@ async function executeScan(targetUrl, options = {}) {
   }
 }
 
-module.exports = {
+export default {
   executeScan
 };
+

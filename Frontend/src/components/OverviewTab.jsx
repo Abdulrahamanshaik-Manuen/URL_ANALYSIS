@@ -12,7 +12,8 @@ import {
   Lock,
   Globe,
   Clock,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 
 export default function OverviewTab({ data, isLoading }) {
@@ -377,7 +378,7 @@ export default function OverviewTab({ data, isLoading }) {
       {showScreenshotModal && screenshot && (
         <div className="modal-overlay" onClick={() => setShowScreenshotModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={() => setShowScreenshotModal(false)}>✕</button>
+            <button className="modal-close-btn" onClick={() => setShowScreenshotModal(false)}><X size={18} /></button>
             <h3 style={{ marginBottom: '16px', fontSize: '18px' }}>Captured Browser Viewport</h3>
             <img src={screenshot} alt="Full Viewport" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
           </div>

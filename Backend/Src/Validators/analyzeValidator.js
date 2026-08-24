@@ -1,6 +1,6 @@
-const { normalizeUrl } = require('../Utils/urlHelper');
+import { normalizeUrl } from '../Utils/urlHelper.js';
 
-function validateAnalyzeRequest(req, res, next) {
+export function validateAnalyzeRequest(req, res, next) {
   const { url, options, advanced } = req.body;
 
   if (!url) {
@@ -26,7 +26,7 @@ function validateAnalyzeRequest(req, res, next) {
   next();
 }
 
-function validateApiCheckRequest(req, res, next) {
+export function validateApiCheckRequest(req, res, next) {
   const { url, method = 'GET' } = req.body;
 
   if (!url) {
@@ -57,7 +57,8 @@ function validateApiCheckRequest(req, res, next) {
   next();
 }
 
-module.exports = {
+export default {
   validateAnalyzeRequest,
   validateApiCheckRequest
 };
+

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Comprehensive URL Analysis, Inspection and Website Monitoring Backend Engine",
   "main": "Server.js",
+  "type": "module",
   "scripts": {
     "start": "node Server.js",
     "dev": "nodemon Server.js"

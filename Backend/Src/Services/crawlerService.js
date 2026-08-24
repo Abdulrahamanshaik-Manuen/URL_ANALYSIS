@@ -1,12 +1,14 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const AuditReport = require('../Models/AuditReport').default || require('../Models/AuditReport');
-const { uploadScreenshotToCloudinary } = require('./cloudinaryService');
-const { runFullAnalysis } = require('./analyzerOrchestrator');
-const { normalizeUrl, extractDomain, extractHostname, extractProtocol } = require('../Utils/urlHelper');
-const { formatAnalysisResponse } = require('../Utils/responseFormatter');
-const { SiteCrawl, Website } = require('../Models');
-const logger = require('../Utils/logger');
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+
+import AuditReport from '../Models/AuditReport.js';
+import { uploadScreenshotToCloudinary } from './cloudinaryService.js';
+import { runFullAnalysis } from './analyzerOrchestrator.js';
+import { normalizeUrl, extractDomain, extractHostname, extractProtocol } from '../Utils/urlHelper.js';
+import { formatAnalysisResponse } from '../Utils/responseFormatter.js';
+import { SiteCrawl, Website } from '../Models/index.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Normalizes link URL against origin domain and verifies same-domain scope
@@ -308,7 +310,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
       crawledPages: pagesResults,
       fullDetails: pagesResults[0]?.details || {}
     });
-    logger.success(`✓ Full Website Crawl Report saved to MongoDB Atlas for ${normalized}`);
+    logger.success(` Full Website Crawl Report saved to MongoDB Atlas for ${normalized}`);
   } catch (auditErr) {
     logger.warn(`AuditReport MongoDB crawl save notice: ${auditErr.message}`);
   }
@@ -330,6 +332,12 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
   return finalPayload;
 }
 
-module.exports = {
+export {
   executeWebsiteCrawl
 };
+
+export default {
+  executeWebsiteCrawl
+};
+
+

@@ -1,14 +1,14 @@
-const dotenv = require('dotenv');
-const logger = require('../Utils/logger');
+import dotenv from 'dotenv';
+import logger from '../Utils/logger.js';
 
 const dotenvResult = dotenv.config();
 if (dotenvResult.error) {
-  logger.warn('⚠️ .env configuration file not found');
+  logger.warn(' .env configuration file not found');
 } else {
-  logger.info('📄 .env loaded successfully');
+  logger.info(' .env loaded successfully');
 }
 
-module.exports = {
+const config = {
   port: process.env.PORT || 5000,
   env: process.env.NODE_ENV || 'development',
   defaultTimeout: parseInt(process.env.DEFAULT_TIMEOUT, 10) || 15000,
@@ -31,3 +31,6 @@ module.exports = {
     mobile: { width: 390, height: 844, name: 'Mobile (iPhone 14)' }
   }
 };
+
+export default config;
+

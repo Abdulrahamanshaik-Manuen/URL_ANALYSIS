@@ -1,8 +1,10 @@
-const cheerio = require('cheerio');
-const axios = require('axios');
-const { resolveUrl } = require('../Utils/urlHelper');
-const config = require('../Config/config');
-const logger = require('../Utils/logger');
+import * as cheerio from 'cheerio';
+
+import axios from 'axios';
+import { resolveUrl } from '../Utils/urlHelper.js';
+import config from '../Config/config.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Checks a sample of resource URLs to see if any are broken (404/500/timeout)
@@ -39,7 +41,8 @@ async function probeBrokenResources(urls, maxProbe = 20) {
  * @param {string} baseUrl
  * @returns {Promise<object>}
  */
-async function analyzeResources(html = '', baseUrl = '') {
+export async function analyzeResources(html = '', baseUrl = '') {
+
   const $ = cheerio.load(html || '');
 
   const images = [];
@@ -176,6 +179,7 @@ async function analyzeResources(html = '', baseUrl = '') {
   };
 }
 
-module.exports = {
+export default {
   analyzeResources
 };
+

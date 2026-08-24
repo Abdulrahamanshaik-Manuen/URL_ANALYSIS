@@ -1,6 +1,6 @@
-const { chromium } = require('playwright');
-const config = require('../Config/config');
-const logger = require('../Utils/logger');
+import { chromium } from 'playwright';
+import config from '../Config/config.js';
+import logger from '../Utils/logger.js';
 
 /**
  * Runs headless browser check using Playwright with accurate screenshot rendering
@@ -8,7 +8,8 @@ const logger = require('../Utils/logger');
  * @param {object} [options={}]
  * @returns {Promise<object>}
  */
-async function runBrowserAudit(targetUrl, options = {}) {
+export async function runBrowserAudit(targetUrl, options = {}) {
+
   let browser = null;
   const timeout = options.timeout || config.defaultTimeout;
 
@@ -267,6 +268,8 @@ async function runBrowserAudit(targetUrl, options = {}) {
   return result;
 }
 
-module.exports = {
+export default {
   runBrowserAudit
 };
+
+

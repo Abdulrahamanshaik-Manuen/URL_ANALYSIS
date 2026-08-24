@@ -1,9 +1,10 @@
-const http = require('http');
-const https = require('https');
-const zlib = require('zlib');
-const { performance } = require('perf_hooks');
-const config = require('../Config/config');
-const logger = require('../Utils/logger');
+import http from 'http';
+import https from 'https';
+import zlib from 'zlib';
+import { performance } from 'perf_hooks';
+import config from '../Config/config.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Measures low-level network performance timings for a target URL
@@ -11,7 +12,8 @@ const logger = require('../Utils/logger');
  * @param {object} [options={}]
  * @returns {Promise<object>}
  */
-function measurePerformance(targetUrl, options = {}) {
+export function measurePerformance(targetUrl, options = {}) {
+
   return new Promise((resolve) => {
     const urlObj = new URL(targetUrl);
     const isHttps = urlObj.protocol === 'https:';
@@ -142,6 +144,7 @@ function measurePerformance(targetUrl, options = {}) {
   });
 }
 
-module.exports = {
+export default {
   measurePerformance
 };
+

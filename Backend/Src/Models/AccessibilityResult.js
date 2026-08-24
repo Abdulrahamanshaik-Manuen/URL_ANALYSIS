@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const accessibilityResultSchema = new mongoose.Schema(
   {
@@ -56,4 +56,5 @@ const accessibilityResultSchema = new mongoose.Schema(
 
 const AccessibilityResult = mongoose.models.AccessibilityResult || mongoose.model('AccessibilityResult', accessibilityResultSchema);
 
-module.exports = AccessibilityResult;
+export default AccessibilityResult;
+

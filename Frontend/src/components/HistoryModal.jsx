@@ -9,7 +9,8 @@ import {
   Compass,
   Activity,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { fetchAuditHistory, fetchReportById, deleteAuditReport } from '../Services/apiService';
 
@@ -75,7 +76,7 @@ export default function HistoryModal({ onClose, onLoadReport }) {
         onClick={(e) => e.stopPropagation()}
       >
         <button className="modal-close-btn" onClick={onClose}>
-          ✕
+          <X size={18} />
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>

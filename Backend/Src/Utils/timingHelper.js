@@ -1,11 +1,11 @@
-const { performance } = require('perf_hooks');
+import { performance } from 'perf_hooks';
 
 /**
  * Timing Helper - High-precision performance measurement
  * Creates a high-precision stopwatch
  * @returns {object} { stop: () => number, elapsed: () => number }
  */
-function createStopwatch() {
+export function createStopwatch() {
   const start = performance.now();
   return {
     stop: () => {
@@ -24,7 +24,7 @@ function createStopwatch() {
  * @param {number} ms
  * @returns {string}
  */
-function formatMs(ms) {
+export function formatMs(ms) {
   if (ms === undefined || ms === null || isNaN(ms)) return '0 ms';
   if (ms < 1000) return `${Math.round(ms * 10) / 10} ms`;
   return `${(ms / 1000).toFixed(2)} s`;
@@ -35,7 +35,7 @@ function formatMs(ms) {
  * @param {number} bytes
  * @returns {string}
  */
-function formatBytes(bytes) {
+export function formatBytes(bytes) {
   if (bytes === undefined || bytes === null || isNaN(bytes) || bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -43,8 +43,9 @@ function formatBytes(bytes) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
-module.exports = {
+export default {
   createStopwatch,
   formatMs,
   formatBytes
 };
+

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const securityResultSchema = new mongoose.Schema(
   {
@@ -99,4 +99,5 @@ const securityResultSchema = new mongoose.Schema(
 
 const SecurityResult = mongoose.models.SecurityResult || mongoose.model('SecurityResult', securityResultSchema);
 
-module.exports = SecurityResult;
+export default SecurityResult;
+

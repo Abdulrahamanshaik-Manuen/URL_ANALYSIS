@@ -185,8 +185,8 @@ export default function PagesTab({ pages = [], siteHealthScore = 0, onInspectPag
                       <td style={{ padding: '14px 16px' }}>
                         {hasIssues ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px' }}>
-                            {page.jsErrorsCount > 0 && <span style={{ color: 'var(--warning)' }}>⚠️ {page.jsErrorsCount} JS Errors</span>}
-                            {page.brokenLinksCount > 0 && <span style={{ color: 'var(--danger)' }}>🚨 {page.brokenLinksCount} Broken Links</span>}
+                            {page.jsErrorsCount > 0 && <span style={{ color: 'var(--warning)' }}>{page.jsErrorsCount} JS Errors</span>}
+                            {page.brokenLinksCount > 0 && <span style={{ color: 'var(--danger)' }}>{page.brokenLinksCount} Broken Links</span>}
                           </div>
                         ) : (
                           <span style={{ color: 'var(--success)', fontSize: '12px' }}>Clean</span>

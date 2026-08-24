@@ -1,11 +1,13 @@
-const express = require('express');
+import express from 'express';
+import { crawlWebsite, streamCrawlWebsite, getCrawlHistory } from '../Controllers/crawlController.js';
+import { validateAnalyzeRequest } from '../Validators/analyzeValidator.js';
+
 const router = express.Router();
-const { crawlWebsite, streamCrawlWebsite, getCrawlHistory } = require('../Controllers/crawlController');
-const { validateAnalyzeRequest } = require('../Validators/analyzeValidator');
 
 // Website Crawl endpoints
 router.post('/', validateAnalyzeRequest, crawlWebsite);
 router.post('/stream', validateAnalyzeRequest, streamCrawlWebsite);
 router.get('/history', getCrawlHistory);
 
-module.exports = router;
+export default router;
+

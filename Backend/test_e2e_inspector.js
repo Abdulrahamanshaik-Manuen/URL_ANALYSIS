@@ -1,34 +1,35 @@
-const axios = require('axios');
+import axios from 'axios';
+
 
 async function runEndToEndVerification() {
-  console.log('🧪 Starting End-to-End Verification of URL Analysis & Website Inspector...\n');
+  console.log(' Starting End-to-End Verification of URL Analysis & Website Inspector...\n');
 
   const BASE_URL = 'http://localhost:5000';
 
   // 1. Verify Frontend Web App Delivery at root /
-  console.log('1️⃣ Testing Web App delivery at GET / ...');
+  console.log('1 Testing Web App delivery at GET / ...');
   try {
     const rootRes = await axios.get(BASE_URL);
     if (rootRes.headers['content-type']?.includes('text/html') && rootRes.data.includes('<div id="root">')) {
-      console.log('   ✅ Web App HTML successfully served at root / (Status 200)');
+      console.log('    Web App HTML successfully served at root / (Status 200)');
     } else {
-      console.log('   ⚠️ Root served unexpected content:', rootRes.headers['content-type']);
+      console.log('    Root served unexpected content:', rootRes.headers['content-type']);
     }
   } catch (err) {
-    console.error('   ❌ Root endpoint check failed:', err.message);
+    console.error('    Root endpoint check failed:', err.message);
   }
 
   // 2. Health check
-  console.log('\n2️⃣ Testing Backend Health at GET /api/health ...');
+  console.log('\n2 Testing Backend Health at GET /api/health ...');
   try {
     const healthRes = await axios.get(`${BASE_URL}/api/health`);
-    console.log('   ✅ Health Check:', healthRes.data.status, `(${healthRes.data.service})`);
+    console.log('    Health Check:', healthRes.data.status, `(${healthRes.data.service})`);
   } catch (err) {
-    console.error('   ❌ Health check failed:', err.message);
+    console.error('    Health check failed:', err.message);
   }
 
   // 3. Full 18-Domain Analysis
-  console.log('\n3️⃣ Testing Full 18-Domain Inspection at POST /api/analyze ...');
+  console.log('\n3 Testing Full 18-Domain Inspection at POST /api/analyze ...');
   try {
     const start = Date.now();
     const analyzeRes = await axios.post(`${BASE_URL}/api/analyze`, {
@@ -55,10 +56,10 @@ async function runEndToEndVerification() {
     }, { timeout: 35000 });
 
     const data = analyzeRes.data;
-    console.log(`   ✅ Analysis Completed in ${(Date.now() - start)}ms`);
-    console.log('   🎯 Target:', data.targetUrl);
-    console.log('   📊 Scores:', JSON.stringify(data.scores));
-    console.log('   📝 Summary:', JSON.stringify(data.summary));
+    console.log(`    Analysis Completed in ${(Date.now() - start)}ms`);
+    console.log('    Target:', data.targetUrl);
+    console.log('    Scores:', JSON.stringify(data.scores));
+    console.log('    Summary:', JSON.stringify(data.summary));
     
     // Check all 18 domains
     const c = data.checks;
@@ -83,19 +84,19 @@ async function runEndToEndVerification() {
     console.log('   18. Overall Health Score:', data.scores?.overall + '/100 (' + data.scores?.rating + ')');
 
   } catch (err) {
-    console.error('   ❌ Full Analysis failed:', err.response ? err.response.data : err.message);
+    console.error('    Full Analysis failed:', err.response ? err.response.data : err.message);
   }
 
   // 4. Quick Check Test
-  console.log('\n4️⃣ Testing Quick Micro-Check (DNS) at GET /api/quick-check/dns ...');
+  console.log('\n4 Testing Quick Micro-Check (DNS) at GET /api/quick-check/dns ...');
   try {
     const quickRes = await axios.get(`${BASE_URL}/api/quick-check/dns?url=https://example.com`);
-    console.log('   ✅ Quick DNS Result:', quickRes.data.data?.A?.[0] || 'Resolved');
+    console.log('    Quick DNS Result:', quickRes.data.data?.A?.[0] || 'Resolved');
   } catch (err) {
-    console.error('   ❌ Quick check failed:', err.message);
+    console.error('    Quick check failed:', err.message);
   }
 
-  console.log('\n✨ All End-to-End System Tests Passed Successfully!\n');
+  console.log('\n All End-to-End System Tests Passed Successfully!\n');
 }
 
 runEndToEndVerification();

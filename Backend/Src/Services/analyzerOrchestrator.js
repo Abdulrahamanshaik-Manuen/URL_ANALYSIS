@@ -1,21 +1,22 @@
-const { performance } = require('perf_hooks');
-const { checkDns } = require('./dnsService');
-const { checkSsl } = require('./sslService');
-const { measurePerformance } = require('./performanceService');
-const { traceRedirects } = require('./redirectService');
-const { analyzeSecurity } = require('./securityService');
-const { analyzeSeo } = require('./seoService');
-const { analyzeResources } = require('./resourceService');
-const { analyzeLinks } = require('./linkService');
-const { analyzeContent } = require('./contentService');
-const { analyzeMobileReadiness } = require('./mobileService');
-const { runBrowserAudit } = require('./browserService');
-const { checkAvailability } = require('./availabilityService');
-const { testApiEndpoint } = require('./apiCheckService');
-const { analyzeAccessibility } = require('./accessibilityService');
-const { detectTechnologies } = require('./technologyService');
-const { auditCookies } = require('./cookieService');
-const logger = require('../Utils/logger');
+import { performance } from 'perf_hooks';
+import { checkDns } from './dnsService.js';
+import { checkSsl } from './sslService.js';
+import { measurePerformance } from './performanceService.js';
+import { traceRedirects } from './redirectService.js';
+import { analyzeSecurity } from './securityService.js';
+import { analyzeSeo } from './seoService.js';
+import { analyzeResources } from './resourceService.js';
+import { analyzeLinks } from './linkService.js';
+import { analyzeContent } from './contentService.js';
+import { analyzeMobileReadiness } from './mobileService.js';
+import { runBrowserAudit } from './browserService.js';
+import { checkAvailability } from './availabilityService.js';
+import { testApiEndpoint } from './apiCheckService.js';
+import { analyzeAccessibility } from './accessibilityService.js';
+import { detectTechnologies } from './technologyService.js';
+import { auditCookies } from './cookieService.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Master analyzer orchestrating all 18 domains based on options
@@ -286,6 +287,12 @@ async function runFullAnalysis(normalizedUrl, options = {}, advanced = {}, onPro
   };
 }
 
-module.exports = {
+export {
   runFullAnalysis
 };
+
+export default {
+  runFullAnalysis
+};
+
+

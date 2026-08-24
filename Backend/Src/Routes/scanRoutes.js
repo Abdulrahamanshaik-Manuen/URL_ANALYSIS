@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as scanController from '../Controllers/scanController.js';
+
 const router = express.Router();
-const scanController = require('../Controllers/scanController');
 
 // GET /api/scans/:id - Scan details
 router.get('/:id', scanController.getScanById);
@@ -32,4 +33,5 @@ router.get('/:id/seo', scanController.getScanSeo);
 // GET /api/scans/:id/accessibility - Accessibility result document
 router.get('/:id/accessibility', scanController.getScanAccessibility);
 
-module.exports = router;
+export default router;
+

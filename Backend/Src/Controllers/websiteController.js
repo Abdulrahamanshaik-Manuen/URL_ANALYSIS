@@ -1,5 +1,6 @@
-const { Website, Scan, CheckResult, ConsoleError, NetworkError, HttpError, LinkCheck, PerformanceResult, SecurityResult, SeoResult, AccessibilityResult, TechnologyResult } = require('../Models');
-const logger = require('../Utils/logger');
+import { Website, Scan, CheckResult, ConsoleError, NetworkError, HttpError, LinkCheck, PerformanceResult, SecurityResult, SeoResult, AccessibilityResult, TechnologyResult } from '../Models/index.js';
+import logger from '../Utils/logger.js';
+
 
 /**
  * Lists all registered websites with pagination and search
@@ -149,9 +150,17 @@ async function deleteWebsite(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getWebsites,
   getWebsiteById,
   getWebsiteScans,
   deleteWebsite
 };
+
+export default {
+  getWebsites,
+  getWebsiteById,
+  getWebsiteScans,
+  deleteWebsite
+};
+

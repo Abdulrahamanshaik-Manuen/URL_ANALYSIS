@@ -1,13 +1,13 @@
-const axios = require('axios');
-const { performance } = require('perf_hooks');
-const config = require('../Config/config');
+import axios from 'axios';
+import { performance } from 'perf_hooks';
+import config from '../Config/config.js';
 
 /**
  * Derives simplified JSON schema descriptor from payload
  * @param {*} data
  * @returns {object}
  */
-function inferSchema(data) {
+export function inferSchema(data) {
   if (data === null) return { type: 'null' };
   if (Array.isArray(data)) {
     return {
@@ -36,7 +36,7 @@ function inferSchema(data) {
  * @param {object} options
  * @returns {Promise<object>}
  */
-async function testApiEndpoint(url, options = {}) {
+export async function testApiEndpoint(url, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   const headers = {
     'User-Agent': options.userAgent || config.defaultUserAgent,
@@ -112,7 +112,8 @@ async function testApiEndpoint(url, options = {}) {
   }
 }
 
-module.exports = {
+export default {
   testApiEndpoint,
   inferSchema
 };
+

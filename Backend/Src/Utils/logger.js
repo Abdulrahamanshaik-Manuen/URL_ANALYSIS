@@ -10,7 +10,7 @@ function formatTimestamp() {
   return new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 }
 
-const logger = {
+export const logger = {
   info: (msg, ...args) => console.log(`${levels.INFO} [${formatTimestamp()}] ${msg}`, ...args),
   success: (msg, ...args) => console.log(`${levels.SUCCESS} [${formatTimestamp()}] ${msg}`, ...args),
   warn: (msg, ...args) => console.warn(`${levels.WARN} [${formatTimestamp()}] ${msg}`, ...args),
@@ -22,4 +22,5 @@ const logger = {
   }
 };
 
-module.exports = logger;
+export default logger;
+

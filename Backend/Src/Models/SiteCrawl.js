@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const pageResultSchema = new mongoose.Schema({
   url: { type: String, required: true },
@@ -63,4 +63,5 @@ const siteCrawlSchema = new mongoose.Schema(
 
 const SiteCrawl = mongoose.models.SiteCrawl || mongoose.model('SiteCrawl', siteCrawlSchema);
 
-module.exports = SiteCrawl;
+export default SiteCrawl;
+

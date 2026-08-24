@@ -1,15 +1,15 @@
-const { normalizeUrl } = require('../Utils/urlHelper');
-const { checkDns } = require('../Services/dnsService');
-const { checkSsl } = require('../Services/sslService');
-const { measurePerformance } = require('../Services/performanceService');
-const { traceRedirects } = require('../Services/redirectService');
-const { checkAvailability } = require('../Services/availabilityService');
-const { analyzeSecurity } = require('../Services/securityService');
+import { normalizeUrl } from '../Utils/urlHelper.js';
+import { checkDns } from '../Services/dnsService.js';
+import { checkSsl } from '../Services/sslService.js';
+import { measurePerformance } from '../Services/performanceService.js';
+import { traceRedirects } from '../Services/redirectService.js';
+import { checkAvailability } from '../Services/availabilityService.js';
+import { analyzeSecurity } from '../Services/securityService.js';
 
 /**
  * Handles individual micro-checks without running the whole pipeline
  */
-async function handleQuickCheck(req, res) {
+export async function handleQuickCheck(req, res) {
   const { type } = req.params;
   const urlParam = req.query.url || req.body.url;
 
@@ -76,6 +76,7 @@ async function handleQuickCheck(req, res) {
   }
 }
 
-module.exports = {
+export default {
   handleQuickCheck
 };
+

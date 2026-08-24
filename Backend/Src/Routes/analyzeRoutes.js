@@ -1,13 +1,17 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import { analyzeUrl, streamAnalyzeUrl } from '../Controllers/analyzeController.js';
+import { handleQuickCheck } from '../Controllers/quickCheckController.js';
+import { handleApiTest } from '../Controllers/apiTestController.js';
+import { bulkAnalyzeWebsites } from '../Controllers/bulkController.js';
+import { validateAnalyzeRequest, validateApiCheckRequest } from '../Validators/analyzeValidator.js';
 
-const { analyzeUrl, streamAnalyzeUrl } = require('../Controllers/analyzeController');
-const { handleQuickCheck } = require('../Controllers/quickCheckController');
-const { handleApiTest } = require('../Controllers/apiTestController');
-const { validateAnalyzeRequest, validateApiCheckRequest } = require('../Validators/analyzeValidator');
+const router = express.Router();
 
 // 1. Full Composite Analysis Endpoints
 router.post('/analyze', validateAnalyzeRequest, analyzeUrl);
+router.post('/bulk-analyze', bulkAnalyzeWebsites);
+
+
 router.post('/analyze/stream', validateAnalyzeRequest, streamAnalyzeUrl);
 router.get('/analyze/stream', (req, res, next) => {
   // Map query params to body format for GET requests
@@ -26,4 +30,5 @@ router.post('/api-check', validateApiCheckRequest, handleApiTest);
 router.get('/quick-check/:type', handleQuickCheck);
 router.post('/quick-check/:type', handleQuickCheck);
 
-module.exports = router;
+export default router;
+

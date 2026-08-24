@@ -258,8 +258,15 @@ function formatAnalysisResponse(url, results, executionTimeMs) {
   };
 }
 
-module.exports = {
+export {
   calculateScores,
   compileDiagnostics,
   formatAnalysisResponse
 };
+
+export default {
+  calculateScores,
+  compileDiagnostics,
+  formatAnalysisResponse
+};
+

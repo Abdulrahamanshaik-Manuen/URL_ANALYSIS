@@ -1,8 +1,9 @@
-const axios = require('axios');
-const app = require('./Server');
+import axios from 'axios';
+import app from './Server.js';
+
 
 async function testFullAnalyze() {
-  console.log('🚀 Testing Full POST /api/analyze on live server...');
+  console.log(' Testing Full POST /api/analyze on live server...');
   try {
     const res = await axios.post('http://localhost:5000/api/analyze', {
       url: 'https://example.com',
@@ -25,7 +26,7 @@ async function testFullAnalyze() {
       }
     }, { timeout: 30000 });
 
-    console.log('✅ Analysis Success:', res.data.success);
+    console.log(' Analysis Success:', res.data.success);
     console.log('   Target URL:', res.data.targetUrl);
     console.log('   Scores:', res.data.scores);
     console.log('   Summary:', res.data.summary);
@@ -36,7 +37,7 @@ async function testFullAnalyze() {
 
     process.exit(0);
   } catch (err) {
-    console.error('❌ Full Analysis Failed:', err.response ? err.response.data : err.message);
+    console.error(' Full Analysis Failed:', err.response ? err.response.data : err.message);
     process.exit(1);
   }
 }

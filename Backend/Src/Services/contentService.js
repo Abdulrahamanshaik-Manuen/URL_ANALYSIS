@@ -1,4 +1,5 @@
-const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
+
 
 /**
  * Performs deep content inspection, reading time, heading hierarchy, keyword matching, and CSS queries
@@ -6,7 +7,7 @@ const cheerio = require('cheerio');
  * @param {object} [options={}]
  * @returns {object}
  */
-function analyzeContent(html = '', options = {}) {
+export function analyzeContent(html = '', options = {}) {
   const $ = cheerio.load(html || '');
 
   // Extract clean readable text
@@ -147,6 +148,7 @@ function analyzeContent(html = '', options = {}) {
   };
 }
 
-module.exports = {
+export default {
   analyzeContent
 };
+
