@@ -101,32 +101,6 @@ export default function HistoryView({ onLoadReport }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Banner Card */}
-      <div className="card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15))', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
-              <Database size={16} /> Dynamic MongoDB Atlas Records
-            </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Audit History & Tracked Sites
-            </h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', maxWidth: '600px' }}>
-              Browse all historical Full Website Audits dynamically fetched from MongoDB Atlas. View site scores, pages scanned, and full check matrices.
-            </p>
-          </div>
-
-          <button
-            onClick={loadHistory}
-            disabled={isLoading}
-            className="btn-secondary"
-            style={{ fontSize: '12px', padding: '8px 16px' }}
-          >
-            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} /> Refresh MongoDB
-          </button>
-        </div>
-      </div>
-
       {/* Filter & Search Bar Card */}
       <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', padding: '16px' }}>
         <div style={{ position: 'relative', width: '280px' }}>
@@ -150,20 +124,31 @@ export default function HistoryView({ onLoadReport }) {
           />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Filter size={14} /> Filter:
-          </span>
-          {['ALL', 'EXCELLENT', 'GOOD', 'POOR'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setRatingFilter(f)}
-              className={ratingFilter === f ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '11px', padding: '4px 12px', borderRadius: 'var(--radius-sm)' }}
-            >
-              {f}
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Filter size={14} /> Filter:
+            </span>
+            {['ALL', 'EXCELLENT', 'GOOD', 'POOR'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setRatingFilter(f)}
+                className={ratingFilter === f ? 'btn-primary' : 'btn-secondary'}
+                style={{ fontSize: '11px', padding: '4px 12px', borderRadius: 'var(--radius-sm)' }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={loadHistory}
+            disabled={isLoading}
+            className="btn-secondary"
+            style={{ fontSize: '12px', padding: '6px 14px' }}
+          >
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} /> Refresh
+          </button>
         </div>
       </div>
 
