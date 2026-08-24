@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Sun, Moon, Download, Settings, Database } from 'lucide-react';
+import { Globe, Sun, Moon, Download, Database } from 'lucide-react';
 
 export default function Navbar({ backendStatus, theme, onToggleTheme, onOpenExport, onOpenSettings, onOpenHistory, hasData }) {
   return (
@@ -25,10 +25,6 @@ export default function Navbar({ backendStatus, theme, onToggleTheme, onOpenExpo
             <span>Export Report</span>
           </button>
         )}
-
-        <button className="theme-toggle-btn" onClick={onOpenSettings} title="System Settings & Check Timer">
-          <Settings size={16} />
-        </button>
 
         <button className="theme-toggle-btn" onClick={onToggleTheme} title="Toggle Theme">
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
