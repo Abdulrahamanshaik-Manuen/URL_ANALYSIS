@@ -346,11 +346,11 @@ export async function crawlWebsite(url, maxPages = 25) {
  * @param {Array<string>} urls
  * @param {number} maxPagesPerSite
  */
-export async function bulkAnalyzeWebsites(urls, maxPagesPerSite = 5) {
+export async function bulkAnalyzeWebsites(urls, maxPagesPerSite = 5, concurrency = 3) {
   const response = await smartFetch('/api/bulk-analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ urls, maxPagesPerSite })
+    body: JSON.stringify({ urls, maxPagesPerSite, concurrency })
   });
 
   const json = await parseResponseBody(response);

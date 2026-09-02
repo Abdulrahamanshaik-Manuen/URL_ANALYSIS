@@ -23,7 +23,16 @@ export default function OverviewTab({ data, isLoading }) {
   const hasData = !!data;
   const overall = hasData ? (scores.overall || 0) : null;
   const rating = hasData ? (scores.rating || 'N/A') : 'Awaiting URL';
-  const screenshot = checks.browser?.screenshot;
+  const screenshot =
+    checks.browser?.screenshot ||
+    data?.screenshotUrl ||
+    data?.screenshot ||
+    data?.fullDetails?.checks?.browser?.screenshot ||
+    data?.fullDetails?.screenshotUrl ||
+    data?.crawledPages?.[0]?.screenshotUrl ||
+    data?.crawledPages?.[0]?.details?.checks?.browser?.screenshot ||
+    data?.pages?.[0]?.screenshotUrl ||
+    data?.pages?.[0]?.details?.checks?.browser?.screenshot;
   const browserError = checks.browser?.error;
 
   const ratingClass =
@@ -196,7 +205,7 @@ export default function OverviewTab({ data, isLoading }) {
           {screenshot ? (
             <div className="browser-mock-container" onClick={() => setShowScreenshotModal(true)}>
               <div className="browser-mock-bar">
-                <div className="browser-mock-url">{data.targetUrl}</div>
+                <div className="browser-mock-url">{data?.targetUrl || data?.url || data?.startUrl || 'Live Preview'}</div>
               </div>
               <div className="screenshot-wrapper">
                 <img src={screenshot} alt="Website Screenshot" className="screenshot-img" />

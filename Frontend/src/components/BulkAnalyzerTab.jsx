@@ -21,7 +21,8 @@ import { bulkAnalyzeWebsites } from '../Services/apiService';
 
 export default function BulkAnalyzerTab({ onLoadReport }) {
   const [urlInput, setUrlInput] = useState('');
-  const [maxPages, setMaxPages] = useState(5);
+  const [maxPagesPerSite, setMaxPagesPerSite] = useState(5);
+  const [concurrency, setConcurrency] = useState(3);
   const [isAuditing, setIsAuditing] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
@@ -45,7 +46,7 @@ export default function BulkAnalyzerTab({ onLoadReport }) {
     setResults(null);
 
     try {
-      const res = await bulkAnalyzeWebsites(rawLines, maxPages);
+      const res = await bulkAnalyzeWebsites(rawLines, maxPagesPerSite, concurrency);
       setResults(res);
     } catch (err) {
       setError(err.message || 'Bulk website audit failed.');
@@ -66,30 +67,7 @@ export default function BulkAnalyzerTab({ onLoadReport }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Banner Card */}
-      <div className="card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15))', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-purple)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
-              <Layers size={16} /> Multi-URL Batch Auditor
-            </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Full Website Audit Engine
-            </h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', maxWidth: '600px' }}>
-              Provide multiple URLs at once. For every URL, our engine executes a complete Full Website Audit (deep 18-domain checks + multi-page crawler) and dynamically persists findings to MongoDB Atlas.
-            </p>
-          </div>
 
-          <button
-            onClick={() => setUrlInput(sampleUrls)}
-            className="btn-secondary"
-            style={{ fontSize: '12px', padding: '8px 16px' }}
-          >
-            <FileCode size={14} /> Load Sample URLs
-          </button>
-        </div>
-      </div>
 
       {/* URL Input Form Card */}
       <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -118,27 +96,55 @@ export default function BulkAnalyzerTab({ onLoadReport }) {
         />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Max Pages Per Site Crawl:</span>
-            <select
-              value={maxPages}
-              onChange={(e) => setMaxPages(Number(e.target.value))}
-              disabled={isAuditing}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-                fontSize: '12px',
-                fontWeight: 700
-              }}
-            >
-              <option value={3}>3 Pages (Fast)</option>
-              <option value={5}>5 Pages (Standard)</option>
-              <option value={10}>10 Pages (Deep)</option>
-              <option value={20}>20 Pages (Comprehensive)</option>
-            </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Max Pages/Site:</label>
+              <input
+                type="number"
+                min="1"
+                placeholder="5 (or Unlimited)"
+                value={maxPagesPerSite === Infinity || maxPagesPerSite === 0 ? '' : maxPagesPerSite}
+                onChange={(e) => setMaxPagesPerSite(e.target.value === '' ? 0 : Number(e.target.value))}
+                disabled={isAuditing}
+                style={{
+                  width: '90px',
+                  padding: '6px 10px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px'
+                }}
+              />
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ fontSize: '11px', padding: '4px 8px', background: maxPagesPerSite === 0 || maxPagesPerSite === Infinity ? 'var(--accent-cyan)' : undefined, color: maxPagesPerSite === 0 || maxPagesPerSite === Infinity ? '#000' : undefined }}
+                onClick={() => setMaxPagesPerSite(maxPagesPerSite === 0 || maxPagesPerSite === Infinity ? 5 : 0)}
+              >
+                {maxPagesPerSite === 0 || maxPagesPerSite === Infinity ? '∞ Unlimited' : 'Set Unlimited'}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Parallel Workers:</label>
+              <input
+                type="number"
+                min="1"
+                value={concurrency}
+                onChange={(e) => setConcurrency(Math.max(1, Number(e.target.value)))}
+                disabled={isAuditing}
+                style={{
+                  width: '70px',
+                  padding: '6px 10px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px'
+                }}
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -166,7 +172,7 @@ export default function BulkAnalyzerTab({ onLoadReport }) {
             >
               {isAuditing ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" /> Running Full Audits...
+                  <Loader2 size={16} className="animate-spin" /> Running Multi-URL Batch...
                 </>
               ) : (
                 <>
@@ -184,6 +190,21 @@ export default function BulkAnalyzerTab({ onLoadReport }) {
           </div>
         )}
       </div>
+
+      {/* Active Batch Progress Card */}
+      {isAuditing && (
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', background: 'var(--bg-tertiary)', border: '1px solid var(--accent-cyan)' }}>
+          <Loader2 size={24} className="spin-animation" style={{ color: 'var(--accent-cyan)' }} />
+          <div>
+            <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Running Multi-URL Batch Audit in Parallel...
+            </h4>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+              Auditing submitted websites simultaneously with parallel workers. Results will populate into MongoDB Atlas shortly.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Results Overview */}
       {results && (
@@ -294,11 +315,12 @@ export default function BulkAnalyzerTab({ onLoadReport }) {
                           </div>
                         </td>
                         <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                          {auditData.fullDetails || auditData ? (
+                          {auditData.fullDetails || auditData.pages?.[0]?.details || auditData ? (
                             <button
                               onClick={() => {
                                 if (onLoadReport) {
-                                  onLoadReport(auditData.fullDetails || auditData, auditData);
+                                  const detailPayload = auditData.fullDetails || auditData.pages?.[0]?.details || (auditData.checks ? auditData : auditData);
+                                  onLoadReport(detailPayload, auditData);
                                 }
                               }}
                               className="btn-secondary"

@@ -77,7 +77,7 @@ export default function HomePage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   // Crawler & System Preferences
-  const [scanMode, setScanMode] = useState('single');
+  const [scanMode, setScanMode] = useState('crawl');
   const [isCrawling, setIsCrawling] = useState(false);
   const [crawledPages, setCrawledPages] = useState([]);
   const [crawlState, setCrawlState] = useState({
@@ -443,9 +443,15 @@ export default function HomePage() {
           {activeView === 'bulk' && (
             <BulkAnalyzerTab
               onLoadReport={(fullDetails, reportDoc) => {
-                setAuditData(fullDetails);
-                if (reportDoc?.targetUrl || reportDoc?.startUrl) {
-                  setUrl(reportDoc.targetUrl || reportDoc.startUrl);
+                const auditPayload = fullDetails?.checks ? fullDetails : (fullDetails?.pages?.[0]?.details || fullDetails?.fullDetails || fullDetails);
+                setAuditData(auditPayload);
+                const pagesList = reportDoc?.pages || fullDetails?.pages || [];
+                if (pagesList.length > 0) {
+                  setCrawledPages(pagesList);
+                }
+                const targetUrl = reportDoc?.startUrl || reportDoc?.targetUrl || reportDoc?.url || auditPayload?.targetUrl || auditPayload?.startUrl;
+                if (targetUrl) {
+                  setUrl(targetUrl);
                 }
                 setActiveView('auditor');
                 setActiveTab('overview');
@@ -462,8 +468,6 @@ export default function HomePage() {
                 if (reportDoc?.crawledPages && reportDoc.crawledPages.length > 0) {
                   setCrawledPages(reportDoc.crawledPages);
                 }
-                setActiveView('auditor');
-                setActiveTab('overview');
               }}
             />
           )}

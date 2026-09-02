@@ -185,10 +185,8 @@ export async function executeScan(targetUrl, options = {}) {
     const formatted = formatAnalysisResponse(normalized, rawResults, durationMs);
     formatted.scanId = scan ? scan._id : null;
     formatted.websiteId = website ? website._id : null;
-    if (screenshotUrl) {
-      if (formatted.checks?.browser) {
-        formatted.checks.browser.screenshot = screenshotUrl;
-      }
+    if (formatted.checks?.browser) {
+      formatted.checks.browser.screenshot = screenshotUrl || rawResults.browser?.screenshot || null;
     }
 
     try {
@@ -203,7 +201,7 @@ export async function executeScan(targetUrl, options = {}) {
         rating: formatted.scores?.rating || 'Unknown',
         domainScores: formatted.scores || {},
         summary: formatted.summary || {},
-        screenshotUrl: screenshotUrl || null,
+        screenshotUrl: screenshotUrl || rawResults.browser?.screenshot || null,
         fullDetails: formatted
       });
       logger.success(` AuditReport saved to MongoDB Atlas for ${normalized}`);

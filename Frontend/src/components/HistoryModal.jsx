@@ -36,29 +36,27 @@ export default function HistoryModal({ onClose, onLoadReport }) {
     try {
       setLoadingReportId(reportId);
       const fullReport = await fetchReportById(reportId);
-      if (fullReport && fullReport.fullDetails) {
-        onLoadReport(fullReport.fullDetails, fullReport);
+      const details = fullReport?.fullDetails || fullReport?.crawledPages?.[0]?.details || (fullReport?.checks ? fullReport : fullReport);
+      if (fullReport && details) {
+        onLoadReport(details, fullReport);
         onClose();
-      } else {
-        alert('Report details could not be parsed.');
       }
     } catch (err) {
-      alert(`Failed to load report: ${err.message}`);
+      console.error('Failed to load report:', err);
     } finally {
       setLoadingReportId(null);
     }
   };
 
   const handleDelete = async (e, reportId) => {
-    e.stopPropagation();
-    if (!window.confirm('Delete this saved audit report from MongoDB Atlas?')) return;
+    if (e) e.stopPropagation();
 
     try {
       setDeletingId(reportId);
       await deleteAuditReport(reportId);
       setReports((prev) => prev.filter((r) => r._id !== reportId));
     } catch (err) {
-      alert(`Delete failed: ${err.message}`);
+      console.error('Delete failed:', err);
     } finally {
       setDeletingId(null);
     }
@@ -283,25 +281,6 @@ export default function HistoryModal({ onClose, onLoadReport }) {
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.rating || 'Score'}</div>
                     </div>
-
-                    <button
-                      onClick={(e) => handleDelete(e, item._id)}
-                      disabled={isDeleting}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--text-muted)',
-                        cursor: 'pointer',
-                        padding: '6px',
-                        borderRadius: '4px',
-                        transition: 'color 0.2s, background 0.2s'
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-                      title="Delete Report from MongoDB"
-                    >
-                      {isDeleting ? <Loader2 size={16} className="spinner-icon" /> : <Trash2 size={16} />}
-                    </button>
                   </div>
                 </div>
               );

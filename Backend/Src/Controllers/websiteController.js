@@ -32,6 +32,7 @@ async function getWebsites(req, res, next) {
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
+        .allowDiskUse(true)
         .lean(),
       Website.countDocuments(query)
     ]);
@@ -89,6 +90,7 @@ async function getWebsiteScans(req, res, next) {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
+        .allowDiskUse(true)
         .lean(),
       Scan.countDocuments(query)
     ]);

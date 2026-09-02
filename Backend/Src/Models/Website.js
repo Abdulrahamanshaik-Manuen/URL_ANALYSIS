@@ -79,6 +79,7 @@ const websiteSchema = new mongoose.Schema(
 // Compound index to prevent duplicate website registrations per user
 websiteSchema.index({ userId: 1, normalizedUrl: 1 }, { unique: true, sparse: true });
 websiteSchema.index({ domain: 1, createdAt: -1 });
+websiteSchema.index({ updatedAt: -1 });
 
 const Website = mongoose.models.Website || mongoose.model('Website', websiteSchema);
 

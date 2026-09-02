@@ -62,10 +62,10 @@ export default function ApiTesterTab({ initialUrl = '' }) {
         </div>
 
         <form onSubmit={handleTest} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="api-tester-form-row">
             <select
-              className="form-control"
-              style={{ width: '120px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}
+              className="form-control api-tester-method-select"
+              style={{ fontWeight: 700, fontFamily: 'var(--font-mono)' }}
               value={method}
               onChange={(e) => setMethod(e.target.value)}
             >
@@ -79,14 +79,14 @@ export default function ApiTesterTab({ initialUrl = '' }) {
 
             <input
               type="text"
-              className="form-control"
-              style={{ flex: 1, fontFamily: 'var(--font-mono)' }}
+              className="form-control api-tester-url-input"
+              style={{ fontFamily: 'var(--font-mono)' }}
               placeholder="https://api.example.com/v1/resource"
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
             />
 
-            <button type="submit" className="btn-primary" style={{ height: '42px', padding: '0 20px' }} disabled={isLoading}>
+            <button type="submit" className="btn-primary api-tester-send-btn" disabled={isLoading}>
               {isLoading ? <Loader2 size={16} className="spinner-icon" /> : <Send size={16} />}
               <span>Send Request</span>
             </button>

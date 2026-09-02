@@ -47,4 +47,6 @@ const AuditReportSchema = new mongoose.Schema(
   }
 );
 
+AuditReportSchema.index({ createdAt: -1 });
+
 export default mongoose.model('AuditReport', AuditReportSchema);

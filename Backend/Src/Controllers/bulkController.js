@@ -8,7 +8,7 @@ import logger from '../Utils/logger.js';
  */
 export async function bulkAnalyzeWebsites(req, res, next) {
   try {
-    const { urls, maxPagesPerSite = 5, concurrency = 2 } = req.body;
+    const { urls, maxPagesPerSite = 5, concurrency = 3 } = req.body;
 
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       return res.status(400).json({
@@ -17,38 +17,46 @@ export async function bulkAnalyzeWebsites(req, res, next) {
       });
     }
 
-    // Limit maximum bulk URLs per request to prevent server overload
-    const targetUrls = urls.slice(0, 50).filter(u => typeof u === 'string' && u.trim().length > 0);
-    logger.info(`Starting bulk full website audit for ${targetUrls.length} URLs`);
+    // Process all valid URLs without artificial batch count limits
+    const targetUrls = urls.filter(u => typeof u === 'string' && u.trim().length > 0);
+    logger.info(`Starting parallel bulk website audit for ${targetUrls.length} URLs`);
 
+    const effectiveMaxPages = Number(maxPagesPerSite) > 0 ? Number(maxPagesPerSite) : (maxPagesPerSite === 'unlimited' || maxPagesPerSite === 0 ? Infinity : 5);
     const results = [];
+    const chunkSize = Math.max(1, Number(concurrency) || 3);
 
-    // Process batch in controlled chunks
-    for (const rawUrl of targetUrls) {
-      try {
-        logger.info(`[Bulk] Processing Full Website Audit for: ${rawUrl}`);
-        // Attempt full website crawl audit first, fallback to deep scan if needed
-        let auditResult;
+    // Process batch in parallel chunks (3 URLs at a time)
+    for (let i = 0; i < targetUrls.length; i += chunkSize) {
+      const chunk = targetUrls.slice(i, i + chunkSize);
+      logger.info(`[Bulk Batch] Processing parallel chunk ${Math.floor(i / chunkSize) + 1}: ${chunk.join(', ')}`);
+
+      const chunkPromises = chunk.map(async (rawUrl) => {
         try {
-          auditResult = await executeWebsiteCrawl(rawUrl, { maxPages: maxPagesPerSite, concurrency: 2 });
-        } catch (crawlErr) {
-          logger.warn(`[Bulk Crawl fallback] Running single-root deep audit for ${rawUrl}: ${crawlErr.message}`);
-          auditResult = await executeScan(rawUrl, { scanType: 'bulk' });
-        }
+          let auditResult;
+          try {
+            auditResult = await executeWebsiteCrawl(rawUrl, { maxPages: effectiveMaxPages, concurrency: 2 });
+          } catch (crawlErr) {
+            logger.warn(`[Bulk Crawl fallback] Single-root deep audit for ${rawUrl}: ${crawlErr.message}`);
+            auditResult = await executeScan(rawUrl, { scanType: 'bulk' });
+          }
 
-        results.push({
-          url: rawUrl,
-          status: 'completed',
-          data: auditResult
-        });
-      } catch (err) {
-        logger.error(`[Bulk Error] Audit failed for ${rawUrl}: ${err.message}`);
-        results.push({
-          url: rawUrl,
-          status: 'failed',
-          error: err.message
-        });
-      }
+          return {
+            url: rawUrl,
+            status: 'completed',
+            data: auditResult
+          };
+        } catch (err) {
+          logger.error(`[Bulk Error] Audit failed for ${rawUrl}: ${err.message}`);
+          return {
+            url: rawUrl,
+            status: 'failed',
+            error: err.message
+          };
+        }
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      results.push(...chunkResults);
     }
 
     return res.status(200).json({

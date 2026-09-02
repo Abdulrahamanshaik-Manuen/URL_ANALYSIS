@@ -62,79 +62,7 @@ export default function SettingsModal({ onClose, config, onSaveConfig }) {
             </div>
           </div>
 
-          {/* Website Crawler Options Section */}
-          <div className="settings-section" style={{
-            background: 'var(--card-bg-subtle, rgba(255,255,255,0.03))',
-            border: '1px solid var(--border-color)',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            marginBottom: '20px'
-          }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
-              <Compass size={16} style={{ color: 'var(--accent-blue)' }} />
-              <span>Full Website Crawler Limits</span>
-            </label>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
-              Control recursive same-domain internal page crawl limits and worker concurrency.
-            </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px' }}>
-              <div>
-                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)' }}>Max Pages Limit</span>
-                <select
-                  value={maxPages}
-                  onChange={(e) => setMaxPages(e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '40px',
-                    marginTop: '6px',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    padding: '0 12px'
-                  }}
-                >
-                  <option value={10}>10 Pages (Fast)</option>
-                  <option value={25}>25 Pages (Standard)</option>
-                  <option value={50}>50 Pages (Deep Audit)</option>
-                  <option value={100}>100 Pages (Full Site)</option>
-                </select>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)' }}>Parallel Workers</span>
-                <select
-                  value={concurrency}
-                  onChange={(e) => setConcurrency(e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '40px',
-                    marginTop: '6px',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    padding: '0 12px'
-                  }}
-                >
-                  <option value={1}>1 Worker (Gentle)</option>
-                  <option value={3}>3 Workers (Balanced)</option>
-                  <option value={5}>5 Workers (High Speed)</option>
-                </select>
-              </div>
-            </div>
-
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={respectRobots}
-                onChange={(e) => setRespectRobots(e.target.checked)}
-                style={{ width: '16px', height: '16px', accentColor: 'var(--accent-blue)' }}
-              />
-              <span>Respect Robots.txt directives & sitemap.xml seeds</span>
-            </label>
-          </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
             <button type="button" className="btn-secondary" onClick={onClose}>

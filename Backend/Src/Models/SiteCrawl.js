@@ -11,7 +11,10 @@ const pageResultSchema = new mongoose.Schema({
   jsErrorsCount: { type: Number, default: 0 },
   brokenLinksCount: { type: Number, default: 0 },
   a11yIssuesCount: { type: Number, default: 0 },
+  buttonsCount: { type: Number, default: 0 },
+  buttonIssuesCount: { type: Number, default: 0 },
   sslValid: { type: Boolean, default: true },
+  screenshotUrl: { type: String, default: '' },
   details: { type: Object, default: {} }
 });
 
@@ -60,6 +63,8 @@ const siteCrawlSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+siteCrawlSchema.index({ createdAt: -1 });
 
 const SiteCrawl = mongoose.models.SiteCrawl || mongoose.model('SiteCrawl', siteCrawlSchema);
 

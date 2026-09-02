@@ -61,19 +61,19 @@ export default function HttpNetworkTab({ data }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Primary IPv4 (A):</span>
-              <span style={{ fontFamily: 'var(--font-mono)' }}>{dns.records?.A?.[0] || 'N/A'}</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{(dns.records?.a || dns.records?.A)?.[0] || 'N/A'}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               <span style={{ color: 'var(--text-muted)' }}>IPv6 (AAAA):</span>
-              <span style={{ fontFamily: 'var(--font-mono)' }}>{dns.records?.AAAA?.[0] || 'None'}</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{(dns.records?.aaaa || dns.records?.AAAA)?.[0] || 'None'}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Name Servers (NS):</span>
-              <span>{dns.records?.NS?.length || 0} configured</span>
+              <span>{(dns.records?.ns || dns.records?.NS)?.length || 0} configured</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--text-muted)' }}>MX Records:</span>
-              <span>{dns.records?.MX?.length || 0} records</span>
+              <span>{(dns.records?.mx || dns.records?.MX)?.length || 0} records</span>
             </div>
           </div>
         </div>

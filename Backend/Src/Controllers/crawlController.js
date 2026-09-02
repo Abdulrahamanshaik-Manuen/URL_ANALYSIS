@@ -73,7 +73,7 @@ export async function streamCrawlWebsite(req, res, next) {
  */
 export async function getCrawlHistory(req, res, next) {
   try {
-    const limit = Math.min(50, parseInt(req.query.limit) || 10);
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
     const domain = req.query.domain;
 
     const query = {};
@@ -85,6 +85,7 @@ export async function getCrawlHistory(req, res, next) {
       .select('-pages.details')
       .sort({ createdAt: -1 })
       .limit(limit)
+      .allowDiskUse(true)
       .lean();
 
     res.json({

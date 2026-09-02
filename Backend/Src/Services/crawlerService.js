@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import AuditReport from '../Models/AuditReport.js';
 import { uploadScreenshotToCloudinary } from './cloudinaryService.js';
 import { runFullAnalysis } from './analyzerOrchestrator.js';
+import browserService from './browserService.js';
 import { normalizeUrl, extractDomain, extractHostname, extractProtocol } from '../Utils/urlHelper.js';
 import { formatAnalysisResponse } from '../Utils/responseFormatter.js';
 import { SiteCrawl, Website } from '../Models/index.js';
@@ -13,7 +14,7 @@ import logger from '../Utils/logger.js';
 /**
  * Normalizes link URL against origin domain and verifies same-domain scope
  */
-function normalizeDiscoveredLink(rawHref, origin, hostname) {
+function normalizeDiscoveredLink(rawHref, pageUrl, origin, hostname) {
   try {
     if (!rawHref || typeof rawHref !== 'string') return null;
 
@@ -28,7 +29,9 @@ function normalizeDiscoveredLink(rawHref, origin, hostname) {
       return null;
     }
 
-    const resolved = new URL(trimmed, origin);
+    // Resolve relative URLs against the current PAGE URL (or fallback to origin)
+    const base = pageUrl || origin;
+    const resolved = new URL(trimmed, base);
 
     // Enforce same-domain or same-hostname boundary
     if (resolved.hostname !== hostname && !resolved.hostname.endsWith(`.${hostname}`)) {
@@ -38,7 +41,31 @@ function normalizeDiscoveredLink(rawHref, origin, hostname) {
     // Strip hash fragments
     resolved.hash = '';
 
-    return resolved.href;
+    let cleanHref = resolved.href;
+
+    // Detect and reject recursive URL traps (e.g. ~and~, /?/, /&/, or multiple ? query params)
+    if (
+      cleanHref.includes('~and~') ||
+      cleanHref.includes('/&/') ||
+      cleanHref.includes('/?/') ||
+      cleanHref.includes('?') && cleanHref.includes('&~') ||
+      (cleanHref.match(/\?/g) || []).length > 2 ||
+      (cleanHref.match(/~/g) || []).length > 2
+    ) {
+      return null;
+    }
+
+    // Detect repeating path segments (e.g. /about/about/ or /products/products/)
+    const pathSegments = resolved.pathname.split('/').filter(Boolean);
+    const uniqueSegments = new Set(pathSegments.map(s => s.toLowerCase()));
+    if (pathSegments.length > uniqueSegments.size + 1) {
+      return null; // Reject recursive repeating path trap!
+    }
+
+    // Strip trailing ? or & if present
+    cleanHref = cleanHref.replace(/[?&]+$/, '');
+
+    return cleanHref;
   } catch (e) {
     return null;
   }
@@ -104,8 +131,8 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
   const domain = extractDomain(normalized);
   const hostname = extractHostname(normalized);
   const origin = normObj.origin;
-  const maxPages = Math.min(100, Math.max(1, parseInt(options.maxPages) || 25));
-  const concurrency = Math.min(5, Math.max(1, parseInt(options.concurrency) || 3));
+  const maxPages = options.maxPages === Infinity || options.maxPages === 'unlimited' || options.maxPages === 0 ? Infinity : Math.max(1, parseInt(options.maxPages) || 50);
+  const concurrency = Math.max(1, parseInt(options.concurrency) || 4);
 
   logger.info(`Starting Playwright browser website crawl for ${normalized} (Max Pages: ${maxPages}, Concurrency: ${concurrency})`);
 
@@ -170,12 +197,27 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
       });
 
       try {
-        // Run full Playwright browser analysis on every single page
-        const { results, executionTimeMs } = await runFullAnalysis(
+        let results, executionTimeMs;
+
+        // Execute full 18-domain real dynamic analysis for EVERY page discovered
+        const fullRes = await runFullAnalysis(
           pageNorm,
-          { ...options, checkBrowser: true }, // OPEN ACTUAL PAGE IN PLAYWRIGHT
+          { ...options, checkBrowser: true },
           options
-        );
+        ).catch((err) => ({
+          results: {
+            availability: { isAvailable: false, statusCode: 500, statusText: err.message },
+            performance: { totalTime: 0, ttfb: 0 },
+            security: { securityScore: 0 },
+            ssl: { valid: false, daysRemaining: 0 },
+            seo: { title: { text: currentUrl } },
+            links: { links: [], broken: [] }
+          },
+          executionTimeMs: 0
+        }));
+
+        results = fullRes.results;
+        executionTimeMs = fullRes.executionTimeMs;
 
         const formatted = formatAnalysisResponse(currentUrl, results, executionTimeMs);
 
@@ -185,7 +227,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
         // 1. Playwright DOM extracted links (Navbar, Footer, Buttons, Interactive Elements)
         if (results.browser && Array.isArray(results.browser.domLinks)) {
           results.browser.domLinks.forEach(l => {
-            const norm = normalizeDiscoveredLink(l.url, origin, hostname);
+            const norm = normalizeDiscoveredLink(l.url, currentUrl, origin, hostname);
             if (norm) pageLinks.push(norm);
           });
         }
@@ -193,7 +235,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
         // 2. Static HTML links inspector
         if (results.links && Array.isArray(results.links.links)) {
           results.links.links.forEach(l => {
-            const norm = normalizeDiscoveredLink(l.url, origin, hostname);
+            const norm = normalizeDiscoveredLink(l.url, currentUrl, origin, hostname);
             if (norm) pageLinks.push(norm);
           });
         }
@@ -210,18 +252,41 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
         }
 
         const urlObj = new URL(currentUrl);
+
+        // Upload Playwright page screenshot to Cloudinary for MongoDB persistence
+        const rawScreenshot = formatted.checks?.browser?.screenshot || results.browser?.screenshot || null;
+        let pageScreenshotUrl = null;
+        if (rawScreenshot && typeof rawScreenshot === 'string') {
+          if (rawScreenshot.startsWith('http://') || rawScreenshot.startsWith('https://')) {
+            pageScreenshotUrl = rawScreenshot;
+          } else {
+            pageScreenshotUrl = await uploadScreenshotToCloudinary(rawScreenshot).catch(() => null);
+          }
+        }
+
+        if (pageScreenshotUrl && formatted.checks?.browser) {
+          formatted.checks.browser.screenshot = pageScreenshotUrl;
+        } else if (rawScreenshot && formatted.checks?.browser && !formatted.checks.browser.screenshot) {
+          formatted.checks.browser.screenshot = rawScreenshot;
+        }
+
+        const buttonAudit = results.browser?.buttonAudit || {};
+
         const pageRecord = {
           url: currentUrl,
           path: urlObj.pathname + urlObj.search,
-          title: formatted.summary.title || formatted.checks?.browser?.pageDetails?.title || formatted.checks?.seo?.title?.text || urlObj.pathname,
-          statusCode: formatted.summary.statusCode || 200,
-          statusText: formatted.summary.statusText || 'OK',
-          responseTimeMs: formatted.summary.responseTimeMs || 0,
-          healthScore: formatted.scores?.overall || 80,
-          jsErrorsCount: formatted.summary.jsErrorsCount || 0,
-          brokenLinksCount: formatted.summary.brokenLinksCount || 0,
-          a11yIssuesCount: formatted.summary.a11yIssuesCount || 0,
-          sslValid: formatted.summary.sslValid !== false,
+          title: formatted.summary?.title || formatted.checks?.browser?.pageDetails?.title || formatted.checks?.seo?.title?.text || urlObj.pathname,
+          statusCode: formatted.summary?.statusCode ?? (formatted.summary?.isAvailable === false ? 500 : 200),
+          statusText: formatted.summary?.statusText || (formatted.summary?.isAvailable === false ? 'Unreachable' : 'OK'),
+          responseTimeMs: formatted.summary?.responseTimeMs || 0,
+          healthScore: formatted.scores?.overall ?? 0,
+          jsErrorsCount: formatted.summary?.jsErrorsCount || 0,
+          brokenLinksCount: formatted.summary?.brokenLinksCount || 0,
+          a11yIssuesCount: formatted.summary?.a11yIssuesCount || 0,
+          buttonsCount: buttonAudit.totalButtons || 0,
+          buttonIssuesCount: buttonAudit.buttonIssuesCount || 0,
+          sslValid: formatted.summary?.sslValid === true,
+          screenshotUrl: pageScreenshotUrl || rawScreenshot || null,
           details: formatted
         };
 
@@ -306,7 +371,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
       rating: siteHealthScore >= 90 ? 'Excellent' : siteHealthScore >= 75 ? 'Good' : siteHealthScore >= 50 ? 'Fair' : 'Poor',
       domainScores: pagesResults[0]?.details?.scores || {},
       summary: pagesResults[0]?.details?.summary || {},
-      screenshotUrl: coverScreenshotUrl || null,
+      screenshotUrl: coverScreenshotUrl || firstScreenshot || null,
       crawledPages: pagesResults,
       fullDetails: pagesResults[0]?.details || {}
     });

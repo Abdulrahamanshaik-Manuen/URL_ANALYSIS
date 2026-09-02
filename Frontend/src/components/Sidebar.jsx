@@ -6,8 +6,6 @@ import {
   Settings,
   Zap,
   Send,
-  ChevronLeft,
-  ChevronRight,
   ShieldCheck,
   Activity,
   Sparkles
@@ -68,6 +66,22 @@ export default function Sidebar({
 
   return (
     <aside className={`left-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      {/* Right Edge Click Handle to Toggle Minimize / Expand (No Arrow Button) */}
+      <div
+        className="sidebar-edge-toggle"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        title={isCollapsed ? 'Click right edge to Expand Sidebar' : 'Click right edge to Minimize Sidebar'}
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '8px',
+          height: '100%',
+          cursor: 'pointer',
+          zIndex: 100
+        }}
+      />
+
       {/* Brand Header */}
       <div className="sidebar-brand-header">
         <div className="sidebar-brand-group">
@@ -77,22 +91,9 @@ export default function Sidebar({
           {!isCollapsed && (
             <div className="sidebar-brand-text">
               <span className="sidebar-brand-name">URL INSPECTOR</span>
-              <span className="sidebar-brand-tag">
-                <Sparkles size={10} style={{ display: 'inline', marginRight: 4 }} />
-                Full Site Audit
-              </span>
             </div>
           )}
         </div>
-
-        {/* Toggle Button */}
-        <button
-          className="sidebar-toggle-btn"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-        >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
       </div>
 
       {/* Navigation List */}
@@ -106,7 +107,7 @@ export default function Sidebar({
               key={item.id}
               onClick={() => setActiveView(item.id)}
               className={`sidebar-menu-item ${isActive ? 'active' : ''}`}
-              title={isCollapsed ? item.label : undefined}
+              title={item.label}
             >
               <div className="sidebar-item-icon">
                 <Icon size={20} />

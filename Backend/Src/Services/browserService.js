@@ -65,7 +65,23 @@ export async function runBrowserAudit(targetUrl, options = {}) {
       ignoreHTTPSErrors: true
     });
 
+    // Abort slow web font network requests so screenshots render instantly without font loading timeouts
+    await context.route('**/*.{woff,woff2,ttf,otf,eot,svg}*', route => route.abort());
+    await context.route('**/*font*', route => route.abort());
+    await context.route('**/*fonts.googleapis.com*', route => route.abort());
+    await context.route('**/*fonts.gstatic.com*', route => route.abort());
+
     const page = await context.newPage();
+
+    // Mock document.fonts.ready to instantly resolve so Playwright screenshot engine never blocks on web fonts
+    await page.addInitScript(() => {
+      try {
+        Object.defineProperty(document, 'fonts', {
+          value: { ready: Promise.resolve(), check: () => true, add: () => {}, delete: () => {} },
+          configurable: true
+        });
+      } catch (e) {}
+    }).catch(() => {});
 
     // 1. Capture JS Runtime Exceptions
     page.on('pageerror', (err) => {
@@ -118,13 +134,21 @@ export async function runBrowserAudit(targetUrl, options = {}) {
 
     // Navigate to page
     const startTime = Date.now();
-    await page.goto(targetUrl, {
+    const mainResponse = await page.goto(targetUrl, {
       waitUntil: 'domcontentloaded',
       timeout: timeout
     }).catch(async () => {
       // Fallback
-      await page.goto(targetUrl, { timeout: 8000 }).catch(() => { });
+      return await page.goto(targetUrl, { timeout: 8000 }).catch(() => null);
     });
+
+    if (mainResponse) {
+      result.pageDetails.statusCode = mainResponse.status();
+      result.pageDetails.statusText = mainResponse.statusText();
+    } else {
+      result.pageDetails.statusCode = 0;
+      result.pageDetails.statusText = 'Failed to Load Page';
+    }
 
     const loadDuration = Date.now() - startTime;
     result.metrics.pageLoadTimeMs = loadDuration;
@@ -132,10 +156,29 @@ export async function runBrowserAudit(targetUrl, options = {}) {
 
     // Wait for network settlement and font loading for accurate rendering
     try {
-      await page.waitForLoadState('networkidle', { timeout: 3500 }).catch(() => { });
+      await page.waitForLoadState('networkidle', { timeout: 800 }).catch(() => { });
       await page.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve())).catch(() => { });
-      // Allow CSS transitions and images to paint
-      await new Promise(r => setTimeout(r, 600));
+
+      // Accelerated top-to-bottom scroll for lazy content & screenshots
+      await page.evaluate(async () => {
+        await new Promise((resolve) => {
+          let totalHeight = 0;
+          const distance = 1000;
+          const timer = setInterval(() => {
+            const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+            window.scrollBy(0, distance);
+            totalHeight += distance;
+            if (totalHeight >= scrollHeight || totalHeight >= 3000) {
+              clearInterval(timer);
+              window.scrollTo(0, 0); // Scroll back to top for screenshot
+              resolve();
+            }
+          }, 10);
+        });
+      }).catch(() => {});
+
+      // Allow CSS transitions and images to paint cleanly
+      await new Promise(r => setTimeout(r, 200));
     } catch (e) { }
 
     // Extract Performance Timing API, Core Web Vitals, and Page Attributes
@@ -226,17 +269,84 @@ export async function runBrowserAudit(targetUrl, options = {}) {
       result.domLinks = [];
     }
 
-    // 5. Capture High-Quality Desktop Screenshot FIRST (Pristine Desktop Viewport)
+    // 4.6. Inspect every interactive button element on the page
+    try {
+      const buttonAudit = await page.evaluate(() => {
+        const buttons = [];
+        let missingAccessibleNameCount = 0;
+        let invalidFormActionCount = 0;
+
+        const elements = document.querySelectorAll(
+          'button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"], [onclick], [data-action]'
+        );
+
+        elements.forEach((el, index) => {
+          if (index > 100) return;
+          const tag = el.tagName.toLowerCase();
+          const type = el.getAttribute('type') || (tag === 'button' ? 'button' : null);
+          const rawText = el.innerText || el.getAttribute('value') || el.getAttribute('aria-label') || el.getAttribute('title') || el.getAttribute('alt') || '';
+          const cleanText = rawText.trim().replace(/\s+/g, ' ').substring(0, 60);
+
+          const hasAccessibleName = cleanText.length > 0;
+          if (!hasAccessibleName) {
+            missingAccessibleNameCount++;
+          }
+
+          let formAction = null;
+          const parentForm = el.closest('form');
+          if (parentForm) {
+            formAction = parentForm.getAttribute('action') || window.location.href;
+          }
+
+          if ((type === 'submit' || tag === 'button') && parentForm && !parentForm.getAttribute('action')) {
+            invalidFormActionCount++;
+          }
+
+          buttons.push({
+            tag,
+            type,
+            text: cleanText || '[No Accessible Label]',
+            hasAccessibleName,
+            hasOnClick: !!el.getAttribute('onclick'),
+            formAction
+          });
+        });
+
+        return {
+          totalButtons: elements.length,
+          buttonsSample: buttons.slice(0, 25),
+          missingAccessibleNameCount,
+          invalidFormActionCount,
+          buttonIssuesCount: missingAccessibleNameCount + invalidFormActionCount
+        };
+      });
+
+      result.buttonAudit = buttonAudit;
+    } catch (e) {
+      result.buttonAudit = {
+        totalButtons: 0,
+        buttonsSample: [],
+        missingAccessibleNameCount: 0,
+        invalidFormActionCount: 0,
+        buttonIssuesCount: 0
+      };
+    }
+
+    result.pageDetails.title = (await page.title().catch(() => '')) || targetUrl;
+
     if (options.captureScreenshot !== false) {
       try {
         const buffer = await page.screenshot({
           type: 'jpeg',
-          quality: 85,
-          fullPage: false
+          quality: 80,
+          fullPage: false,
+          animations: 'disabled',
+          scale: 'css',
+          timeout: 8000
         });
         result.screenshot = `data:image/jpeg;base64,${buffer.toString('base64')}`;
       } catch (err) {
-        logger.warn(`Screenshot capture failed: ${err.message}`);
+        logger.warn(`Screenshot capture notice for ${targetUrl}: ${err.message}`);
       }
     }
 
