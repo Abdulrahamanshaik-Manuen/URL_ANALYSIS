@@ -58,41 +58,19 @@ export async function checkDns(hostname) {
 
     result.responseTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
 
-    if (a && a.length > 0) {
-      result.records.a = a;
-      result.records.A = a;
-    }
-    if (aaaa && aaaa.length > 0) {
-      result.records.aaaa = aaaa;
-      result.records.AAAA = aaaa;
-    }
-    if (cname && cname.length > 0) {
-      result.records.cname = cname;
-      result.records.CNAME = cname;
-    }
+    if (a && a.length > 0) result.records.a = a;
+    if (aaaa && aaaa.length > 0) result.records.aaaa = aaaa;
+    if (cname && cname.length > 0) result.records.cname = cname;
     if (mx && mx.length > 0) {
-      const sortedMx = mx.sort((x, y) => x.priority - y.priority);
-      result.records.mx = sortedMx;
-      result.records.MX = sortedMx;
+      result.records.mx = mx.sort((x, y) => x.priority - y.priority);
     }
-    if (ns && ns.length > 0) {
-      result.records.ns = ns;
-      result.records.NS = ns;
-    }
+    if (ns && ns.length > 0) result.records.ns = ns;
     if (txt && txt.length > 0) {
       // Flatten TXT arrays
-      const formattedTxt = txt.map(entry => Array.isArray(entry) ? entry.join('') : entry);
-      result.records.txt = formattedTxt;
-      result.records.TXT = formattedTxt;
+      result.records.txt = txt.map(entry => Array.isArray(entry) ? entry.join('') : entry);
     }
-    if (caa && caa.length > 0) {
-      result.records.caa = caa;
-      result.records.CAA = caa;
-    }
-    if (soa) {
-      result.records.soa = soa;
-      result.records.SOA = soa;
-    }
+    if (caa && caa.length > 0) result.records.caa = caa;
+    if (soa) result.records.soa = soa;
 
     result.resolved = (a && a.length > 0) || (aaaa && aaaa.length > 0) || (cname && cname.length > 0);
 
