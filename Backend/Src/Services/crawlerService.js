@@ -5,7 +5,7 @@ import AuditReport from '../Models/AuditReport.js';
 import { uploadScreenshotToCloudinary } from './cloudinaryService.js';
 import { runFullAnalysis } from './analyzerOrchestrator.js';
 import browserService from './browserService.js';
-import { normalizeUrl, extractDomain, extractHostname, extractProtocol } from '../Utils/urlHelper.js';
+import { normalizeUrl, extractDomain, extractHostname, extractProtocol, cleanRecursiveUrl } from '../Utils/urlHelper.js';
 import { formatAnalysisResponse } from '../Utils/responseFormatter.js';
 import { SiteCrawl, Website } from '../Models/index.js';
 import logger from '../Utils/logger.js';
@@ -41,14 +41,15 @@ function normalizeDiscoveredLink(rawHref, pageUrl, origin, hostname) {
     // Strip hash fragments
     resolved.hash = '';
 
-    let cleanHref = resolved.href;
+    let cleanHref = cleanRecursiveUrl(resolved.href);
 
     // Detect and reject recursive URL traps (e.g. ~and~, /?/, /&/, or multiple ? query params)
     if (
+      !cleanHref ||
       cleanHref.includes('~and~') ||
       cleanHref.includes('/&/') ||
       cleanHref.includes('/?/') ||
-      cleanHref.includes('?') && cleanHref.includes('&~') ||
+      cleanHref.length > 180 ||
       (cleanHref.match(/\?/g) || []).length > 2 ||
       (cleanHref.match(/~/g) || []).length > 2
     ) {
@@ -132,7 +133,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
   const hostname = extractHostname(normalized);
   const origin = normObj.origin;
   const maxPages = options.maxPages === Infinity || options.maxPages === 'unlimited' || options.maxPages === 0 ? Infinity : Math.max(1, parseInt(options.maxPages) || 50);
-  const concurrency = Math.max(1, parseInt(options.concurrency) || 4);
+  const concurrency = Math.max(1, parseInt(options.concurrency) || 6);
 
   logger.info(`Starting Playwright browser website crawl for ${normalized} (Max Pages: ${maxPages}, Concurrency: ${concurrency})`);
 
@@ -181,7 +182,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
   // Crawl worker loop - Opens EVERY page in Playwright browser
   async function worker() {
     while (queue.length > 0 && pagesResults.length < maxPages) {
-      const currentUrl = queue.shift();
+      const currentUrl = cleanRecursiveUrl(queue.shift());
       if (!currentUrl) break;
 
       const pageNorm = normalizeUrl(currentUrl);
@@ -189,7 +190,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
       const crawlingProgressText = `Crawling ${pagesResults.length + 1} / ${Math.max(discoveredSet.size, pagesResults.length + 1)} pages`;
 
       emitProgress('page_start', {
-        currentUrl,
+        currentUrl: cleanRecursiveUrl(currentUrl),
         crawledCount: pagesResults.length,
         discoveredCount: discoveredSet.size,
         remainingCount: queue.length,
@@ -202,8 +203,8 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
         // Execute full 18-domain real dynamic analysis for EVERY page discovered
         const fullRes = await runFullAnalysis(
           pageNorm,
-          { ...options, checkBrowser: true },
-          options
+          { ...options, checkBrowser: true, isCrawler: true, timeout: 6000 },
+          { ...options, isCrawler: true, timeout: 6000 }
         ).catch((err) => ({
           results: {
             availability: { isAvailable: false, statusCode: 500, statusText: err.message },
@@ -273,7 +274,7 @@ async function executeWebsiteCrawl(startUrl, options = {}, onProgress = null) {
         const buttonAudit = results.browser?.buttonAudit || {};
 
         const pageRecord = {
-          url: currentUrl,
+          url: cleanRecursiveUrl(currentUrl),
           path: urlObj.pathname + urlObj.search,
           title: formatted.summary?.title || formatted.checks?.browser?.pageDetails?.title || formatted.checks?.seo?.title?.text || urlObj.pathname,
           statusCode: formatted.summary?.statusCode ?? (formatted.summary?.isAvailable === false ? 500 : 200),

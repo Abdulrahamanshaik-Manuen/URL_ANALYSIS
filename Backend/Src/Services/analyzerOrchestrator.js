@@ -11,7 +11,6 @@ import { analyzeContent } from './contentService.js';
 import { analyzeMobileReadiness } from './mobileService.js';
 import { runBrowserAudit } from './browserService.js';
 import { checkAvailability } from './availabilityService.js';
-import { testApiEndpoint } from './apiCheckService.js';
 import { analyzeAccessibility } from './accessibilityService.js';
 import { detectTechnologies } from './technologyService.js';
 import { auditCookies } from './cookieService.js';
@@ -245,21 +244,6 @@ async function runFullAnalysis(normalizedUrl, options = {}, advanced = {}, onPro
     );
   }
 
-  // Optional API check if requested
-  if (options.checkAPI || options.api) {
-    htmlTasks.push(
-      testApiEndpoint(targetUrl, {
-        method: advanced.apiMethod || 'GET',
-        headers: advanced.headers,
-        body: advanced.apiBody,
-        auth: advanced.auth
-      }).then(apiRes => {
-        results.api = apiRes;
-        emitProgress('api', apiRes);
-      })
-    );
-  }
-
   await Promise.allSettled(htmlTasks);
 
   // 3. Playwright Headless Browser Inspection
@@ -268,7 +252,8 @@ async function runFullAnalysis(normalizedUrl, options = {}, advanced = {}, onPro
       emitProgress('browser_starting', { message: 'Running Playwright browser audit...' });
       const browserRes = await runBrowserAudit(targetUrl, {
         userAgent: advanced.userAgent,
-        timeout: advanced.timeout || 12000,
+        timeout: advanced.timeout || options.timeout,
+        isCrawler: advanced.isCrawler || options.isCrawler,
         captureScreenshot: advanced.captureScreenshot !== false
       });
       results.browser = browserRes;

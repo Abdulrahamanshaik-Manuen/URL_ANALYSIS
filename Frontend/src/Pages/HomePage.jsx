@@ -22,11 +22,11 @@ import LinksTab from '../components/LinksTab';
 import AssetsTab from '../components/AssetsTab';
 import ResponsiveTab from '../components/ResponsiveTab';
 import TechnologyTab from '../components/TechnologyTab';
-import ApiTesterTab from '../components/ApiTesterTab';
 import QuickChecksTab from '../components/QuickChecksTab';
 import PagesTab from '../components/PagesTab';
 import ExportModal from '../components/ExportModal';
 import HistoryModal from '../components/HistoryModal';
+import LiveTracking from './LiveTracking';
 
 
 import {
@@ -290,7 +290,6 @@ export default function HomePage() {
     { id: 'assets', label: 'Images & Assets', icon: Image },
     { id: 'responsive', label: 'Responsive', icon: Smartphone },
     { id: 'tech', label: 'Technology Stack', icon: Cpu },
-    { id: 'api', label: 'API Tester', icon: Send },
     { id: 'quick', label: 'Micro-Checks', icon: Sparkles }
   ];
 
@@ -433,7 +432,6 @@ export default function HomePage() {
                 {activeTab === 'assets' && <AssetsTab data={auditData} />}
                 {activeTab === 'responsive' && <ResponsiveTab data={auditData} />}
                 {activeTab === 'tech' && <TechnologyTab data={auditData} />}
-                {activeTab === 'api' && <ApiTesterTab initialUrl={url} />}
                 {activeTab === 'quick' && <QuickChecksTab currentUrl={url} />}
               </main>
             </>
@@ -475,8 +473,16 @@ export default function HomePage() {
           {/* VIEW 4: Micro Checks Suite */}
           {activeView === 'quick' && <QuickChecksTab currentUrl={url} />}
 
-          {/* VIEW 5: API Endpoint Tester */}
-          {activeView === 'api-tester' && <ApiTesterTab initialUrl={url} />}
+          {/* VIEW 5: Real-Time Live Website Tracker */}
+          {activeView === 'live-tracking' && (
+            <LiveTracking
+              onInspectUrl={(targetUrl) => {
+                setUrl(targetUrl);
+                setActiveView('auditor');
+              }}
+              defaultPollInterval={systemConfig.livePollInterval || 10}
+            />
+          )}
         </div>
       </div>
 

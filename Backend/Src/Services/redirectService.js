@@ -1,7 +1,7 @@
 import http from 'http';
 import https from 'https';
 import config from '../Config/config.js';
-import { resolveUrl } from '../Utils/urlHelper.js';
+import { resolveUrl, cleanRecursiveUrl } from '../Utils/urlHelper.js';
 import logger from '../Utils/logger.js';
 
 
@@ -140,7 +140,7 @@ export async function traceRedirects(initialUrl, options = {}) {
 
   return {
     initialUrl,
-    finalUrl,
+    finalUrl: cleanRecursiveUrl(finalUrl),
     count: redirectCount,
     hasLoop,
     isHttpToHttps,

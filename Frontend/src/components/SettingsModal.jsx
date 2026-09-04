@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Clock, Compass, Shield, Save, Check } from 'lucide-react';
+import { X, Clock, Compass, Shield, Save, Check, Radio } from 'lucide-react';
 
 export default function SettingsModal({ onClose, config, onSaveConfig }) {
   const [timerMinutes, setTimerMinutes] = useState(config?.timerMinutes || '');
+  const [livePollInterval, setLivePollInterval] = useState(config?.livePollInterval || 10);
   const [maxPages, setMaxPages] = useState(config?.maxPages || 25);
   const [concurrency, setConcurrency] = useState(config?.concurrency || 3);
   const [respectRobots, setRespectRobots] = useState(config?.respectRobots !== false);
@@ -12,6 +13,7 @@ export default function SettingsModal({ onClose, config, onSaveConfig }) {
     e.preventDefault();
     onSaveConfig({
       timerMinutes: timerMinutes ? parseInt(timerMinutes, 10) : null,
+      livePollInterval: parseInt(livePollInterval, 10) || 10,
       maxPages: parseInt(maxPages, 10) || 25,
       concurrency: parseInt(concurrency, 10) || 3,
       respectRobots
@@ -33,6 +35,37 @@ export default function SettingsModal({ onClose, config, onSaveConfig }) {
         </div>
 
         <form onSubmit={handleSave} className="modal-body" style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Live Tracking Polling Rate Section */}
+          <div className="settings-section" style={{
+            background: 'var(--card-bg-subtle, rgba(255,255,255,0.03))',
+            border: '1px solid var(--border-color)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '16px'
+          }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
+              <Radio size={16} style={{ color: 'var(--accent-primary)' }} />
+              <span>Live Tracking Poll Frequency</span>
+            </label>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+              Choose how often live website health, uptime, and SSL checks auto-refresh in Live Tracking mode.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <select
+                className="url-input-field"
+                value={livePollInterval}
+                onChange={(e) => setLivePollInterval(Number(e.target.value))}
+                style={{ height: '42px', padding: '0 14px', fontSize: '14px', flex: 1, background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
+              >
+                <option value={5}>Every 5 Seconds (Fastest Uptime Tracking)</option>
+                <option value={10}>Every 10 Seconds (Recommended Default)</option>
+                <option value={15}>Every 15 Seconds (Balanced)</option>
+                <option value={30}>Every 30 Seconds (Low Bandwidth)</option>
+                <option value={60}>Every 60 Seconds (1 Minute)</option>
+              </select>
+            </div>
+          </div>
+
           {/* Custom Check Timer Section */}
           <div className="settings-section" style={{
             background: 'var(--card-bg-subtle, rgba(255,255,255,0.03))',
@@ -43,10 +76,10 @@ export default function SettingsModal({ onClose, config, onSaveConfig }) {
           }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
               <Clock size={16} style={{ color: 'var(--accent-cyan)' }} />
-              <span>Automated Website Check Timer</span>
+              <span>Automated Background Audit Timer</span>
             </label>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-              Set your own custom interval in minutes to automatically check your target website health. Leave empty to disable background timer.
+              Set custom interval in minutes for automated full website crawls. Leave empty to disable background timer.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <input

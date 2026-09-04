@@ -28,7 +28,7 @@ export default function UrlInputBar({
           <input
             type="text"
             className="url-input-field"
-            placeholder="Enter website URL to crawl & audit all pages (e.g. https://www.minhaimportsandexports.com)..."
+            placeholder="Enter Url to crawl"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             disabled={isLoading}
@@ -55,7 +55,7 @@ export default function UrlInputBar({
           ) : (
             <>
               <Compass size={18} />
-              <span>Audit Full Website</span>
+              <span>Crawl</span>
             </>
           )}
         </button>

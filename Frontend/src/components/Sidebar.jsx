@@ -5,10 +5,10 @@ import {
   History,
   Settings,
   Zap,
-  Send,
   ShieldCheck,
   Activity,
-  Sparkles
+  Sparkles,
+  Radio
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -22,43 +22,37 @@ export default function Sidebar({
   const navItems = [
     {
       id: 'auditor',
-      label: 'Full Website Auditor',
-      description: 'Single URL deep site audit & crawler',
+      label: 'Crawl Website',
       icon: Globe,
       badge: null
     },
     {
+      id: 'live-tracking',
+      label: 'Live Tracking',
+      icon: Radio,
+      badge: 'LIVE'
+    },
+    {
       id: 'bulk',
-      label: 'Multi-URL Batch Auditor',
-      description: 'Audit & track multiple URLs at once',
+      label: 'Track URLs',
       icon: Layers,
-      badge: 'Batch'
+      badge: null
     },
     {
       id: 'history',
       label: 'Audit History & Sites',
-      description: 'Tracked URLs & check matrix history',
       icon: History,
-      badge: historyCount > 0 ? historyCount : null
+      badge: null
     },
     {
       id: 'quick',
       label: 'Micro Checks Suite',
-      description: 'Instant DNS, SSL, security checks',
       icon: Zap,
-      badge: 'Instant'
-    },
-    {
-      id: 'api-tester',
-      label: 'API Endpoint Tester',
-      description: 'REST API response & schema auditor',
-      icon: Send,
       badge: null
     },
     {
       id: 'settings',
       label: 'Audit Settings',
-      description: 'Inspect options & user preferences',
       icon: Settings,
       badge: null
     }
@@ -120,9 +114,6 @@ export default function Sidebar({
                 </div>
               )}
 
-              {!isCollapsed && item.badge && (
-                <span className="sidebar-badge">{item.badge}</span>
-              )}
             </button>
           );
         })}

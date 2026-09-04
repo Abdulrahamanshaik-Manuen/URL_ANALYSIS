@@ -1,9 +1,8 @@
 import express from 'express';
 import { analyzeUrl, streamAnalyzeUrl } from '../Controllers/analyzeController.js';
 import { handleQuickCheck } from '../Controllers/quickCheckController.js';
-import { handleApiTest } from '../Controllers/apiTestController.js';
 import { bulkAnalyzeWebsites } from '../Controllers/bulkController.js';
-import { validateAnalyzeRequest, validateApiCheckRequest } from '../Validators/analyzeValidator.js';
+import { validateAnalyzeRequest } from '../Validators/analyzeValidator.js';
 
 const router = express.Router();
 
@@ -23,10 +22,7 @@ router.get('/analyze/stream', (req, res, next) => {
   next();
 }, validateAnalyzeRequest, streamAnalyzeUrl);
 
-// 2. Dedicated API Endpoint Checker
-router.post('/api-check', validateApiCheckRequest, handleApiTest);
-
-// 3. Instant Micro / Quick Checks
+// 2. Instant Micro / Quick Checks
 router.get('/quick-check/:type', handleQuickCheck);
 router.post('/quick-check/:type', handleQuickCheck);
 

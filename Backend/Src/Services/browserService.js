@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import config from '../Config/config.js';
 import logger from '../Utils/logger.js';
+import { cleanRecursiveUrl } from '../Utils/urlHelper.js';
 
 /**
  * Runs headless browser check using Playwright with accurate screenshot rendering
@@ -11,7 +12,7 @@ import logger from '../Utils/logger.js';
 export async function runBrowserAudit(targetUrl, options = {}) {
 
   let browser = null;
-  const timeout = options.timeout || config.defaultTimeout;
+  const timeout = options.isCrawler ? (options.timeout || 6000) : (options.timeout || config.defaultTimeout || 12000);
 
   const result = {
     success: false,
@@ -138,8 +139,8 @@ export async function runBrowserAudit(targetUrl, options = {}) {
       waitUntil: 'domcontentloaded',
       timeout: timeout
     }).catch(async () => {
-      // Fallback
-      return await page.goto(targetUrl, { timeout: 8000 }).catch(() => null);
+      if (options.isCrawler) return null;
+      return await page.goto(targetUrl, { timeout: 6000 }).catch(() => null);
     });
 
     if (mainResponse) {
@@ -152,7 +153,7 @@ export async function runBrowserAudit(targetUrl, options = {}) {
 
     const loadDuration = Date.now() - startTime;
     result.metrics.pageLoadTimeMs = loadDuration;
-    result.pageDetails.finalUrl = page.url();
+    result.pageDetails.finalUrl = cleanRecursiveUrl(page.url());
 
     // Wait for network settlement and font loading for accurate rendering
     try {

@@ -1,4 +1,13 @@
 import React, { useState } from 'react';
+
+const cleanUrlDisplay = (urlStr) => {
+  if (!urlStr || typeof urlStr !== 'string') return '';
+  let u = urlStr.trim();
+  if (u.includes('and~') || u.includes('~and') || u.includes('/?/') || u.includes('/&/') || u.length > 140) {
+    u = u.replace(/(\/\?\/&.*|\/\?\/.*|\/&\/.*|~?and~?.*|(\/[^/]+)\2{2,}.*)/i, '');
+  }
+  return u.replace(/[?&]+$/, '').replace(/\/+$/, '');
+};
 import {
   Compass,
   CheckCircle2,
@@ -291,7 +300,7 @@ export default function PagesTab({ pages = [], siteHealthScore = 0, onInspectPag
                         {page.title || page.path}
                       </h4>
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '10px' }}>
-                        {page.url}
+                        {cleanUrlDisplay(page.url)}
                       </div>
 
                       {/* Issue summary pills */}
@@ -411,7 +420,7 @@ export default function PagesTab({ pages = [], siteHealthScore = 0, onInspectPag
                             {page.title || page.path}
                           </div>
                           <div style={{ color: 'var(--text-muted)', fontSize: '12px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span>{page.url}</span>
+                            <span>{cleanUrlDisplay(page.url)}</span>
                             <a href={page.url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-cyan)' }}>
                               <ExternalLink size={12} />
                             </a>
@@ -482,7 +491,7 @@ export default function PagesTab({ pages = [], siteHealthScore = 0, onInspectPag
                   {selectedPageModal.title || selectedPageModal.path}
                 </h3>
                 <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
-                  {selectedPageModal.url}
+                  {cleanUrlDisplay(selectedPageModal.url)}
                 </span>
               </div>
               <button className="theme-toggle-btn" onClick={() => setSelectedPageModal(null)} title="Close Modal">

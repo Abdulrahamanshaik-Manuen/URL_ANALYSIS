@@ -84,7 +84,15 @@ export default function CrawlProgressCard({ crawlState }) {
         <div style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
           <Loader2 size={14} className="spinner-icon" style={{ color: 'var(--accent-cyan)', flexShrink: 0 }} />
           <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Currently checking:</span>
-          <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUrl}</span>
+          <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {(() => {
+              let u = currentUrl;
+              if (u.includes('and~') || u.includes('~and') || u.includes('/?/') || u.includes('/&/') || u.length > 120) {
+                u = u.replace(/(\/\?\/&.*|\/\?\/.*|\/&\/.*|~?and~?.*|(\/[^/]+)\2{2,}.*)/i, '');
+              }
+              return u.replace(/[?&]+$/, '').replace(/\/+$/, '');
+            })()}
+          </span>
         </div>
       )}
     </div>
